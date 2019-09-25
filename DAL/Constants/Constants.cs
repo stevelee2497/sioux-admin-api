@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DAL.Constants
 {
@@ -21,14 +21,6 @@ namespace DAL.Constants
 	{
 		public const string Ascending = "asc";
 		public const string Descending = "desc";
-	}
-
-	public static class BookType
-	{
-		public const string NewBooks = "new";
-		public const string RecommendingBooks = "recommending";
-		public const string TrendingBooks = "trending";
-		public const string FeaturingBooks = "featuring";
 	}
 
 	public static class Jwt

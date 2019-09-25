@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DAL.Constants;
 using DAL.Exceptions;
 using DAL.Extensions;
@@ -28,151 +28,183 @@ namespace Services.Implementations
 			_roleService = roleService;
 		}
 
-		public BaseResponse<List<UserOutputDto>> All(IDictionary<string, string> @params)
-		{
-			var users = Include(user => user.UserRoles).ThenInclude(user => user.Role)
-				.AsEnumerable()
-				.Select(Mapper.Map<UserOutputDto>)
-				.ToList();
+        #region Get Users
 
-			return new BaseResponse<List<UserOutputDto>>(HttpStatusCode.OK, data: users);
-		}
+        public BaseResponse<List<UserOutputDto>> All(IDictionary<string, string> @params)
+        {
+            var users = Include(user => user.UserRoles).ThenInclude(user => user.Role)
+                .AsEnumerable()
+                .Select(Mapper.Map<UserOutputDto>)
+                .ToList();
 
-		public BaseResponse<User> Get(Guid id)
-		{
-			var user = Find(id);
-			if (user == null)
-			{
-				throw new DataNotFoundException("userOutput");
-			}
+            return new BaseResponse<List<UserOutputDto>>(HttpStatusCode.OK, data: users);
+        }
 
-			return new BaseResponse<User>(HttpStatusCode.OK, data: user);
-		}
+        #endregion
 
-		public BaseResponse<string> Register(AuthDto authDto)
-		{
-			if (FirstOrDefault(u => u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase)) != null)
-			{
-				throw new BadRequestException("Tài khoản đã tồn tại.");
-			}
+        #region Get Specific User
 
-			var (salt, hash) = PasswordHelper.GenerateSecurePassword(authDto.Password);
-			var user = new User
-			{
-				Email = authDto.Email,
-				PasswordHash = hash,
-				PasswordSalt = salt,
-				DisplayName = authDto.Email,
-			};
-			var response = Create(user, out var isSaved);
+        public BaseResponse<User> Get(Guid id)
+        {
+            var user = Find(id);
+            if (user == null)
+            {
+                throw new DataNotFoundException("userOutput");
+            }
 
-			var role = _roleService.FirstOrDefault(r => r.Name.Equals(DefaultRole.User));
-			if (role == null)
-			{
-				throw new InternalServerErrorException($"Không có role {DefaultRole.User} tồn tại");
-			}
+            return new BaseResponse<User>(HttpStatusCode.OK, data: user);
+        }
 
-			_userRoleService.Create(new UserRole {UserId = response.Id, RoleId = role.Id}, out isSaved);
+        #endregion
 
-			if (!isSaved)
-			{
-				throw new InternalServerErrorException("Không thể đăng ký, vui lòng thử lại");
-			}
+        #region Register a user
 
-			return new BaseResponse<string>(HttpStatusCode.OK, data: "Đăng ký thành công");
-		}
+        public BaseResponse<string> Register(AuthDto authDto)
+        {
+            CheckIfEmailExisted(authDto);
+            var user = CreateUser(authDto);
+            SetRoleForUser(user.Id, DefaultRole.User);
+            return new BaseResponse<string>(HttpStatusCode.OK, data: "Đăng ký thành công");
+        }
 
-		public BaseResponse<Token> Login(AuthDto authDto)
-		{
-			var user = Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
-				.FirstOrDefault(u =>
-					u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase)
-				);
+        private void CheckIfEmailExisted(AuthDto authDto)
+        {
+            if (FirstOrDefault(u => u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase)) != null)
+            {
+                throw new BadRequestException("Tài khoản đã tồn tại.");
+            }
+        }
 
-			if (user == null)
-			{
-				throw new DataNotFoundException("Tài khoản không tồn tại");
-			}
+        private User CreateUser(AuthDto authDto)
+        {
+            var (salt, hash) = PasswordHelper.GenerateSecurePassword(authDto.Password);
+            var user = new User
+            {
+                Email = authDto.Email,
+                PasswordHash = hash,
+                PasswordSalt = salt,
+            };
+            var createdUser = Create(user, out var isSaved);
+            if (!isSaved)
+            {
+                throw new InternalServerErrorException("Không thể đăng ký, vui lòng thử lại");
+            }
 
-			var hash = PasswordHelper.ComputeHash(authDto.Password, user.PasswordSalt);
+            return createdUser;
+        }
 
-			if (!user.PasswordHash.SequenceEqual(hash))
-			{
-				throw new BadRequestException("Mật khẩu không chính xác.");
-			}
+        #endregion
 
-			var token = JwtHelper.CreateToken(Mapper.Map<UserOutputDto>(user));
-			return new BaseResponse<Token>(HttpStatusCode.OK, data: token);
-		}
+        #region Login
 
-		public BaseResponse<UserOutputDto> Update(Guid userId, UserInputDto userInput)
-		{
-			var newUser = Mapper.Map<User>(userInput);
-			var oldUser = Include(u => u.UserRoles).ThenInclude(ur => ur.Role).FirstOrDefault(u => u.Id == userId);
-			oldUser = UpdateUserInformationIfChanged(oldUser, newUser);
-			oldUser = UpdateUserRoleIfChanged(oldUser, oldUser.GetRoles(), userInput.Roles);
-			return new BaseResponse<UserOutputDto>(statusCode: HttpStatusCode.OK,
-				data: Mapper.Map<UserOutputDto>(oldUser));
-		}
+        public BaseResponse<Token> Login(AuthDto authDto)
+        {
+            var user = Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+                .FirstOrDefault(u =>
+                    u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase)
+                );
 
-		private User UpdateUserInformationIfChanged(User oldUser, User newUser)
-		{
-			if (oldUser == null)
-			{
-				throw new BadRequestException("Không tồn tại tài khoản này");
-			}
+            if (user == null)
+            {
+                throw new DataNotFoundException("Tài khoản không tồn tại");
+            }
 
-			if (oldUser.DisplayName.Equals(newUser.DisplayName) &&
-			    (newUser.DisplayName ?? "").Equals(oldUser.DisplayName))
-			{
-				return oldUser;
-			}
+            var hash = PasswordHelper.ComputeHash(authDto.Password, user.PasswordSalt);
 
-			oldUser.AvatarUrl = newUser.AvatarUrl;
-			oldUser.DisplayName = newUser.DisplayName;
-			var updateUserResult = Update(oldUser);
-			if (!updateUserResult)
-			{
-				throw new InternalServerErrorException(
-					$"Không thể update cho userOutput {JsonConvert.SerializeObject(newUser)}");
-			}
+            if (!user.PasswordHash.SequenceEqual(hash))
+            {
+                throw new BadRequestException("Mật khẩu không chính xác.");
+            }
 
-			return oldUser;
-		}
+            var token = JwtHelper.CreateToken(Mapper.Map<UserOutputDto>(user));
+            return new BaseResponse<Token>(HttpStatusCode.OK, data: token);
+        }
 
-		private User UpdateUserRoleIfChanged(User user, string[] oldRoles, string[] newRoles)
-		{
-			// update userOutput's role to admin
-			if (newRoles.Contains(DefaultRole.Admin) && !oldRoles.Contains(DefaultRole.Admin))
-			{
-				var adminRole = _roleService.FirstOrDefault(r => r.Name.Equals(DefaultRole.Admin));
-				var adminUserRole =
-					_userRoleService.Create(new UserRole {UserId = user.Id, RoleId = adminRole.Id}, out var isSaved);
-				if (!isSaved)
-				{
-					throw new InternalServerErrorException(
-						$"Không thể update role cho userOutput {JsonConvert.SerializeObject(user)}");
-				}
+        #endregion
 
-				adminUserRole.Role = adminRole;
-				user.UserRoles.Add(adminUserRole);
-			}
+        #region Update
 
-			// set userOutput's role from admin to userOutput
-			if (!newRoles.Contains(DefaultRole.Admin) && oldRoles.Contains(DefaultRole.Admin))
-			{
-				var adminUserRole = user.UserRoles.First(ur => ur.IsActivated() && ur.Role.Name.Equals(DefaultRole.Admin));
-				var isDeleted = _userRoleService.Delete(adminUserRole);
-				if (!isDeleted)
-				{
-					throw new InternalServerErrorException(
-						$"Không thể update role cho userOutput {JsonConvert.SerializeObject(user)}");
-				}
+        public BaseResponse<UserOutputDto> Update(Guid userId, UserInputDto userInput)
+        {
+            var newUser = Mapper.Map<User>(userInput);
+            var oldUser = Include(u => u.UserRoles).ThenInclude(ur => ur.Role).FirstOrDefault(u => u.Id == userId);
+            oldUser = UpdateUserInformationIfChanged(oldUser, newUser);
+            oldUser = UpdateUserRoleIfChanged(oldUser, oldUser.GetRoles(), userInput.Roles);
+            return new BaseResponse<UserOutputDto>(statusCode: HttpStatusCode.OK,
+                data: Mapper.Map<UserOutputDto>(oldUser));
+        }
 
-				user.UserRoles.Remove(adminUserRole);
-			}
+        private User UpdateUserInformationIfChanged(User oldUser, User newUser)
+        {
+            if (oldUser == null)
+            {
+                throw new BadRequestException("Không tồn tại tài khoản này");
+            }
 
-			return user;
-		}
-	}
+            var updateUserResult = Update(oldUser);
+            if (!updateUserResult)
+            {
+                throw new InternalServerErrorException(
+                    $"Không thể update cho userOutput {JsonConvert.SerializeObject(newUser)}");
+            }
+
+            return oldUser;
+        }
+
+        private User UpdateUserRoleIfChanged(User user, string[] oldRoles, string[] newRoles)
+        {
+            // update userOutput's role to admin
+            if (newRoles.Contains(DefaultRole.Admin) && !oldRoles.Contains(DefaultRole.Admin))
+            {
+                var adminRole = _roleService.FirstOrDefault(r => r.Name.Equals(DefaultRole.Admin));
+                var adminUserRole =
+                    _userRoleService.Create(new UserRole { UserId = user.Id, RoleId = adminRole.Id }, out var isSaved);
+                if (!isSaved)
+                {
+                    throw new InternalServerErrorException(
+                        $"Không thể update role cho userOutput {JsonConvert.SerializeObject(user)}");
+                }
+
+                adminUserRole.Role = adminRole;
+                user.UserRoles.Add(adminUserRole);
+            }
+
+            // set userOutput's role from admin to userOutput
+            if (!newRoles.Contains(DefaultRole.Admin) && oldRoles.Contains(DefaultRole.Admin))
+            {
+                var adminUserRole = user.UserRoles.First(ur => ur.IsActivated() && ur.Role.Name.Equals(DefaultRole.Admin));
+                var isDeleted = _userRoleService.Delete(adminUserRole);
+                if (!isDeleted)
+                {
+                    throw new InternalServerErrorException(
+                        $"Không thể update role cho userOutput {JsonConvert.SerializeObject(user)}");
+                }
+
+                user.UserRoles.Remove(adminUserRole);
+            }
+
+            return user;
+        }
+
+        #endregion
+
+        #region Common
+
+        private void SetRoleForUser(Guid userId, string roleName)
+        {
+            var role = _roleService.FirstOrDefault(r => r.Name.Equals(roleName));
+            if (role == null)
+            {
+                throw new InternalServerErrorException($"Không có role {roleName} tồn tại");
+            }
+
+            _userRoleService.Create(new UserRole { UserId = userId, RoleId = role.Id }, out var isSaved);
+            if (!isSaved)
+            {
+                throw new InternalServerErrorException("Không thể đăng ký, vui lòng thử lại");
+            }
+        }
+
+        #endregion
+    }
 }
