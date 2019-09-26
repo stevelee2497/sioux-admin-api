@@ -93,6 +93,7 @@ namespace API
 		{
 			options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 			options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
+            options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 		}
 
 		private void DbContextOptions(DbContextOptionsBuilder options)

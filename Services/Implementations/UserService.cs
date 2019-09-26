@@ -77,13 +77,7 @@ namespace Services.Implementations
 
         private User CreateUser(AuthDto authDto)
         {
-            var (salt, hash) = PasswordHelper.GenerateSecurePassword(authDto.Password);
-            var user = new User
-            {
-                Email = authDto.Email,
-                PasswordHash = hash,
-                PasswordSalt = salt,
-            };
+            var user = Mapper.Map<User>(authDto).EncodePassword(authDto.Password);
             var createdUser = Create(user, out var isSaved);
             if (!isSaved)
             {
@@ -99,10 +93,9 @@ namespace Services.Implementations
 
         public BaseResponse<Token> Login(AuthDto authDto)
         {
-            var user = Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
-                .FirstOrDefault(u =>
-                    u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase)
-                );
+            var user = Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefault(u => u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase));
 
             if (user == null)
             {
