@@ -26,7 +26,7 @@ namespace DAL.Models
 
         public string Address { get; set; }
 
-        public string PhoneNumber { get; set; }
+        public string Phone { get; set; }
 
         public string SocialLink { get; set; }
 
@@ -40,6 +40,21 @@ namespace DAL.Models
 
         public DateTimeOffset? AllowTokensSince { get; set; }
 
+        [InverseProperty("Reporter")]
+        public virtual ICollection<Task> CreatedTasks { get; set; }
+
         public virtual ICollection<UserRole> UserRoles { get; set; }
+
+        public virtual ICollection<UserPosition> UserPositions { get; set; }
+
+        public virtual ICollection<UserSkill> UserSkills { get; set; }
+
+        public virtual ICollection<WorkLog> WorkLogs { get; set; }
+
+        public virtual ICollection<Comment> Comments { get; set; }
+
+        public virtual ICollection<TaskAssignee> TaskAssignees { get; set; }
+
+        public virtual ICollection<TaskAction> TaskActions { get; set; }
     }
 }
