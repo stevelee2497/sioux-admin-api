@@ -55,6 +55,11 @@ namespace Services.Implementations
         public async Task<T> FindAsync(Guid id)
             => await Repository.FindAsync(id);
 
+        public T First(Expression<Func<T, bool>> predicate)
+        {
+            return Repository.First(predicate);
+        }
+
         public virtual T FirstOrDefault(Expression<Func<T, bool>> predicate)
         {
             return Repository.FirstOrDefault(predicate);

@@ -29,7 +29,7 @@ namespace API.Controllers
 
 		[HttpPost("register")]
 		[Produces("application/json")]
-		public BaseResponse<string> Register([FromBody] AuthDto user)
+		public BaseResponse<string> Register([FromBody] UserInputDto user)
 		{
 			return _userService.Register(user);
 		}

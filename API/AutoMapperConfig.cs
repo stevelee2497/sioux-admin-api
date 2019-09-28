@@ -17,11 +17,6 @@ namespace API
 
 			#region User
 
-			configuration.CreateMap<AuthDto, User>().ForMember(
-                destination => destination.Gender,
-                map => map.MapFrom(source => Enum.Parse<Gender>(source.Gender, true))
-            );
-
 			configuration.CreateMap<UserInputDto, User>();
 
 			configuration.CreateMap<User, UserOutputDto>().ForMember(

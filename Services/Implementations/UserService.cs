@@ -59,23 +59,23 @@ namespace Services.Implementations
 
         #region Register a user
 
-        public BaseResponse<string> Register(AuthDto authDto)
+        public BaseResponse<string> Register(UserInputDto authDto)
         {
-            CheckIfEmailExisted(authDto);
+            CheckIfEmailExisted(authDto.Email);
             var user = CreateUser(authDto);
             SetRoleForUser(user.Id, DefaultRole.User);
             return new BaseResponse<string>(HttpStatusCode.OK, data: "Đăng ký thành công");
         }
 
-        private void CheckIfEmailExisted(AuthDto authDto)
+        private void CheckIfEmailExisted(string email)
         {
-            if (FirstOrDefault(u => u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase)) != null)
+            if (FirstOrDefault(u => u.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase)) != null)
             {
                 throw new BadRequestException("Tài khoản đã tồn tại.");
             }
         }
 
-        private User CreateUser(AuthDto authDto)
+        private User CreateUser(UserInputDto authDto)
         {
             var user = Mapper.Map<User>(authDto).EncodePassword(authDto.Password);
             var createdUser = Create(user, out var isSaved);
@@ -93,24 +93,19 @@ namespace Services.Implementations
 
         public BaseResponse<Token> Login(AuthDto authDto)
         {
-            var user = Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefault(u => u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase));
+            var user = First(u => u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase));
+            CheckUserPassword(authDto.Password, user);
+            var token = JwtHelper.CreateToken(Mapper.Map<UserOutputDto>(user));
+            return new BaseResponse<Token>(HttpStatusCode.OK, data: token);
+        }
 
-            if (user == null)
-            {
-                throw new DataNotFoundException("Tài khoản không tồn tại");
-            }
-
-            var hash = PasswordHelper.ComputeHash(authDto.Password, user.PasswordSalt);
-
+        private static void CheckUserPassword(string password, User user)
+        {
+            var hash = PasswordHelper.ComputeHash(password, user.PasswordSalt);
             if (!user.PasswordHash.SequenceEqual(hash))
             {
                 throw new BadRequestException("Mật khẩu không chính xác.");
             }
-
-            var token = JwtHelper.CreateToken(Mapper.Map<UserOutputDto>(user));
-            return new BaseResponse<Token>(HttpStatusCode.OK, data: token);
         }
 
         #endregion

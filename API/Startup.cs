@@ -39,8 +39,18 @@ namespace API
 		{
 			services.AddSingleton((IConfigurationRoot) Configuration);
 			services.AddSingleton(Configuration);
-			services.AddCors();
-			services.AddMvc(MvcOptions).AddJsonOptions(JsonOptions).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder
+                            .AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    });
+            });
+            services.AddMvc(MvcOptions).AddJsonOptions(JsonOptions).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddWebDataLayer();
 			services.AddDbContext<DatabaseContext>(DbContextOptions);
 			services.AddSwaggerGen(SwaggerConfigs);
@@ -56,14 +66,14 @@ namespace API
 			}
 
 			ServiceProviderHelper.Init(app.ApplicationServices);
-			app.UseStaticFiles();
 			app.UseCookiePolicy();
 			app.UseAuthentication();
 			app.UseSwagger();
 			app.UseSwaggerUI(SwaggerUIConfig);
-			app.UseCors(ConfigureCors);
+			app.UseCors("AllowAll");
 			app.UseMvc();
-			DbInitializer.DbInitializer.Seed(app.ApplicationServices);
+			app.UseStaticFiles();
+            DbInitializer.DbInitializer.Seed(app.ApplicationServices);
 		}
 
 		private JsonSerializerSettings JsonConvertDefaultSettings() => new JsonSerializerSettings
@@ -73,15 +83,6 @@ namespace API
 			ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
 			ContractResolver = new CamelCasePropertyNamesContractResolver()
 		};
-
-		private void ConfigureCors(CorsPolicyBuilder builder)
-		{
-			builder
-				.AllowAnyOrigin()
-				.AllowAnyHeader()
-				.AllowAnyMethod()
-				.AllowCredentials();
-		}
 
 		private void MvcOptions(MvcOptions options)
 		{
