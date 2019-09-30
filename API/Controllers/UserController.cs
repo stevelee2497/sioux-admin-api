@@ -20,14 +20,13 @@ namespace API.Controllers
 		}
 
 		[HttpGet]
-		[Authorize]
 		[Produces("application/json")]
 		public BaseResponse<List<UserOutputDto>> All([FromHeader] IDictionary<string, string> @params)
 		{
 			return _userService.All(@params);
 		}
 
-		[HttpPost("register")]
+		[HttpPost]
 		[Produces("application/json")]
 		public BaseResponse<string> Register([FromBody] UserInputDto user)
 		{

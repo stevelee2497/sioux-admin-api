@@ -18,7 +18,6 @@ namespace Services.DTOs.Input
         [Required]
         public string FullName { get; set; }
 
-        [Required]
         public string Location { get; set; }
 
         public string Address { get; set; }
@@ -29,13 +28,10 @@ namespace Services.DTOs.Input
 
         public DateTimeOffset BirthDate { get; set; }
 
-        [Required]
         public string Gender { get; set; }
 
         public string Description { get; set; }
 
         public string Timeline { get; set; }
-
-        public string[] Roles { get; set; }
 	}
 }

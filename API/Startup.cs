@@ -39,17 +39,7 @@ namespace API
 		{
 			services.AddSingleton((IConfigurationRoot) Configuration);
 			services.AddSingleton(Configuration);
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    builder =>
-                    {
-                        builder
-                            .AllowAnyOrigin()
-                            .AllowAnyMethod()
-                            .AllowAnyHeader();
-                    });
-            });
+            services.AddCors(SetupCors);
             services.AddMvc(MvcOptions).AddJsonOptions(JsonOptions).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddWebDataLayer();
 			services.AddDbContext<DatabaseContext>(DbContextOptions);
@@ -58,7 +48,7 @@ namespace API
 			JsonConvert.DefaultSettings = JsonConvertDefaultSettings;
 		}
 
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
 			if (env.IsDevelopment())
 			{
@@ -76,7 +66,17 @@ namespace API
             DbInitializer.DbInitializer.Seed(app.ApplicationServices);
 		}
 
-		private JsonSerializerSettings JsonConvertDefaultSettings() => new JsonSerializerSettings
+        private void SetupCors(CorsOptions options)
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        }
+
+        private JsonSerializerSettings JsonConvertDefaultSettings() => new JsonSerializerSettings
 		{
 			Formatting = Formatting.Indented,
 			DefaultValueHandling = DefaultValueHandling.Ignore,

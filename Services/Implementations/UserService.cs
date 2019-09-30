@@ -93,7 +93,10 @@ namespace Services.Implementations
 
         public BaseResponse<Token> Login(AuthDto authDto)
         {
-            var user = First(u => u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase));
+            var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
+                .Include(x => x.UserPositions).ThenInclude(x => x.Position)
+                .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
+                .First(u => u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase));
             CheckUserPassword(authDto.Password, user);
             var token = JwtHelper.CreateToken(Mapper.Map<UserOutputDto>(user));
             return new BaseResponse<Token>(HttpStatusCode.OK, data: token);
@@ -117,7 +120,6 @@ namespace Services.Implementations
             var newUser = Mapper.Map<User>(userInput);
             var oldUser = Include(u => u.UserRoles).ThenInclude(ur => ur.Role).FirstOrDefault(u => u.Id == userId);
             oldUser = UpdateUserInformationIfChanged(oldUser, newUser);
-            oldUser = UpdateUserRoleIfChanged(oldUser, oldUser.GetRoles(), userInput.Roles);
             return new BaseResponse<UserOutputDto>(statusCode: HttpStatusCode.OK,
                 data: Mapper.Map<UserOutputDto>(oldUser));
         }
