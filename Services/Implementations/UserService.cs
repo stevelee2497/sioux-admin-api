@@ -46,11 +46,10 @@ namespace Services.Implementations
 
         public BaseResponse<User> Get(Guid id)
         {
-            var user = Find(id);
-            if (user == null)
-            {
-                throw new DataNotFoundException("userOutput");
-            }
+            var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
+                .Include(x => x.UserPositions).ThenInclude(x => x.Position)
+                .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
+                .First(x => x.Id == id);
 
             return new BaseResponse<User>(HttpStatusCode.OK, data: user);
         }
@@ -64,24 +63,24 @@ namespace Services.Implementations
             CheckIfEmailExisted(authDto.Email);
             var user = CreateUser(authDto);
             SetRoleForUser(user.Id, DefaultRole.User);
-            return new BaseResponse<string>(HttpStatusCode.OK, data: "Đăng ký thành công");
+            return new BaseResponse<string>(HttpStatusCode.OK, data: "Registered successfully");
         }
 
         private void CheckIfEmailExisted(string email)
         {
             if (FirstOrDefault(u => u.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase)) != null)
             {
-                throw new BadRequestException("Tài khoản đã tồn tại.");
+                throw new BadRequestException($"Account with email {email} is already existed");
             }
         }
 
         private User CreateUser(UserInputDto authDto)
         {
-            var user = Mapper.Map<User>(authDto).EncodePassword(authDto.Password);
+            var user = Mapper.Map<User>(authDto).EncodePassword(authDto.Email);
             var createdUser = Create(user, out var isSaved);
             if (!isSaved)
             {
-                throw new InternalServerErrorException("Không thể đăng ký, vui lòng thử lại");
+                throw new InternalServerErrorException($"Could not create user {authDto.Email}");
             }
 
             return createdUser;
@@ -118,62 +117,29 @@ namespace Services.Implementations
         public BaseResponse<UserOutputDto> Update(Guid userId, UserInputDto userInput)
         {
             var newUser = Mapper.Map<User>(userInput);
-            var oldUser = Include(u => u.UserRoles).ThenInclude(ur => ur.Role).FirstOrDefault(u => u.Id == userId);
+            var oldUser = First(u => u.Id == userId);
             oldUser = UpdateUserInformationIfChanged(oldUser, newUser);
-            return new BaseResponse<UserOutputDto>(statusCode: HttpStatusCode.OK,
-                data: Mapper.Map<UserOutputDto>(oldUser));
+            return new SuccessResponse<UserOutputDto>(Mapper.Map<UserOutputDto>(oldUser));
         }
 
         private User UpdateUserInformationIfChanged(User oldUser, User newUser)
         {
-            if (oldUser == null)
-            {
-                throw new BadRequestException("Không tồn tại tài khoản này");
-            }
+            oldUser.AvatarUrl = newUser.AvatarUrl;
+            oldUser.FullName = newUser.FullName;
+            oldUser.Location = newUser.Location;
+            oldUser.Address = newUser.Address;
+            oldUser.Phone = newUser.Phone;
+            oldUser.SocialLink = newUser.SocialLink;
+            oldUser.BirthDate = newUser.BirthDate;
+            oldUser.Description = newUser.Description;
 
             var updateUserResult = Update(oldUser);
             if (!updateUserResult)
             {
-                throw new InternalServerErrorException(
-                    $"Không thể update cho userOutput {JsonConvert.SerializeObject(newUser)}");
+                throw new InternalServerErrorException($"Không thể update cho userOutput {JsonConvert.SerializeObject(newUser)}");
             }
 
             return oldUser;
-        }
-
-        private User UpdateUserRoleIfChanged(User user, string[] oldRoles, string[] newRoles)
-        {
-            // update userOutput's role to admin
-            if (newRoles.Contains(DefaultRole.Admin) && !oldRoles.Contains(DefaultRole.Admin))
-            {
-                var adminRole = _roleService.FirstOrDefault(r => r.Name.Equals(DefaultRole.Admin));
-                var adminUserRole =
-                    _userRoleService.Create(new UserRole { UserId = user.Id, RoleId = adminRole.Id }, out var isSaved);
-                if (!isSaved)
-                {
-                    throw new InternalServerErrorException(
-                        $"Không thể update role cho userOutput {JsonConvert.SerializeObject(user)}");
-                }
-
-                adminUserRole.Role = adminRole;
-                user.UserRoles.Add(adminUserRole);
-            }
-
-            // set userOutput's role from admin to userOutput
-            if (!newRoles.Contains(DefaultRole.Admin) && oldRoles.Contains(DefaultRole.Admin))
-            {
-                var adminUserRole = user.UserRoles.First(ur => ur.IsActivated() && ur.Role.Name.Equals(DefaultRole.Admin));
-                var isDeleted = _userRoleService.Delete(adminUserRole);
-                if (!isDeleted)
-                {
-                    throw new InternalServerErrorException(
-                        $"Không thể update role cho userOutput {JsonConvert.SerializeObject(user)}");
-                }
-
-                user.UserRoles.Remove(adminUserRole);
-            }
-
-            return user;
         }
 
         #endregion
@@ -182,16 +148,11 @@ namespace Services.Implementations
 
         private void SetRoleForUser(Guid userId, string roleName)
         {
-            var role = _roleService.FirstOrDefault(r => r.Name.Equals(roleName));
-            if (role == null)
-            {
-                throw new InternalServerErrorException($"Không có role {roleName} tồn tại");
-            }
-
+            var role = _roleService.First(r => r.Name.Equals(roleName));
             _userRoleService.Create(new UserRole { UserId = userId, RoleId = role.Id }, out var isSaved);
             if (!isSaved)
             {
-                throw new InternalServerErrorException("Không thể đăng ký, vui lòng thử lại");
+                throw new InternalServerErrorException($"Could not create role {roleName}");
             }
         }
 

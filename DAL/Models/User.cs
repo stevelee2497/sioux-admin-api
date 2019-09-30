@@ -36,8 +36,6 @@ namespace DAL.Models
 
         public string Description { get; set; }
 
-        public string Timeline { get; set; }
-
         public DateTimeOffset? AllowTokensSince { get; set; }
 
         [InverseProperty("Reporter")]
@@ -56,5 +54,8 @@ namespace DAL.Models
         public virtual ICollection<TaskAssignee> TaskAssignees { get; set; }
 
         public virtual ICollection<TaskAction> TaskActions { get; set; }
+
+        public virtual ICollection<TimeLineEvent> TimeLineEvents { get; set; }
+
     }
 }
