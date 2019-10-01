@@ -11,31 +11,31 @@ using System.Linq;
 
 namespace Services.Implementations
 {
-    public class UserSkillService : EntityService<UserSkill>, IUserSkillService
+    public class UserPositionService : EntityService<UserPosition>, IUserPositionService
     {
         #region Create
 
-        public BaseResponse<bool> Create(UserSkillInputDto userSkill)
+        public BaseResponse<bool> Create(UserPositionInputDto userPosition)
         {
-            Create(Mapper.Map<UserSkill>(userSkill), out var isSaved);
+            Create(Mapper.Map<UserPosition>(userPosition), out var isSaved);
             if (!isSaved)
             {
-                throw new InternalServerErrorException(string.Format(Error.CreateError, $"user id {userSkill.UserId} skills"));
+                throw new InternalServerErrorException(string.Format(Error.CreateError, $"user id {userPosition.UserId}\'s positions"));
             }
 
-            return new SuccessResponse<bool>(true); 
+            return new SuccessResponse<bool>(true);
         }
 
         #endregion
 
         #region Create Many
 
-        public BaseResponse<int> CreateMany(List<UserSkillInputDto> userSkill)
+        public BaseResponse<int> CreateMany(List<UserPositionInputDto> userPositions)
         {
-            var entities = CreateMany(userSkill.Select(Mapper.Map<UserSkill>), out var isSaved);
+            var entities = CreateMany(userPositions.Select(Mapper.Map<UserPosition>), out var isSaved);
             if (!isSaved)
             {
-                throw new InternalServerErrorException(string.Format(Error.CreateError, $"user skills"));
+                throw new InternalServerErrorException(string.Format(Error.CreateError, $"user positions"));
             }
 
             return new SuccessResponse<int>(entities.Count());
