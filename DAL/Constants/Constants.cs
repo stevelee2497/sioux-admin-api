@@ -9,6 +9,7 @@ namespace DAL.Constants
 		public const string InternalServerError = "Internal Server Error";
 		public const string BlockedUser = "UserHasBeenBlocked";
 		public const string InvalidInput = "Invalid Input";
+		public const string CreateError = "Could not create entity {0}";
 	}
 
 	public static class DefaultRole

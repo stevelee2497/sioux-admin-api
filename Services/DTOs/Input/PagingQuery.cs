@@ -1,6 +1,6 @@
 ﻿namespace Services.DTOs.Input
 {
-	public class PagingRequest
+	public class PagingQuery
 	{
 		public int Page { get; set; } = 1;
 		public int Limit { get; set; } = 20;

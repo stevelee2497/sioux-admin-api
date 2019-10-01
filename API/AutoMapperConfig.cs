@@ -24,9 +24,26 @@ namespace API
 				map => map.MapFrom(source => source.GetRoles())
 			);
 
-			#endregion
+            #endregion
 
-			Mapper.Initialize(configuration);
+            #region Skill
+
+            configuration.CreateMap<SkillInputDto, Skill>();
+
+            configuration.CreateMap<Skill, SkillOutputDto>();
+
+            #endregion
+
+
+            #region User Skills
+
+            configuration.CreateMap<UserSkillInputDto, UserSkill>();
+
+            configuration.CreateMap<UserSkill, UserSkillOutputDto>();
+
+            #endregion
+
+            Mapper.Initialize(configuration);
 		}
 	}
 }
