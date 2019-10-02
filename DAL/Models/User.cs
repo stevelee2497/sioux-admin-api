@@ -10,7 +10,7 @@ namespace DAL.Models
     public class User : BaseEntity
     {
         [Required]
-        public string Email { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         public byte[] PasswordSalt { get; set; }
@@ -25,6 +25,8 @@ namespace DAL.Models
         public string Location { get; set; }
 
         public string Address { get; set; }
+
+        public string Email { get; set; }
 
         public string Phone { get; set; }
 

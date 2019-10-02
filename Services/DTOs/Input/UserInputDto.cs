@@ -5,8 +5,7 @@ namespace Services.DTOs.Input
 {
     public class UserInputDto
 	{
-        [Required]
-        public string Email { get; set; }
+        public string UserName { get; set; }
 
 		public string AvatarUrl { get; set; }
 
@@ -16,6 +15,9 @@ namespace Services.DTOs.Input
         public string Location { get; set; }
 
         public string Address { get; set; }
+
+        [Required]
+        public string Email { get; set; }
 
         public string PhoneNumber { get; set; }
 

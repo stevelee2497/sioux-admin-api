@@ -1,7 +1,5 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.Configuration;
-using DAL.Enums;
 using DAL.Extensions;
 using DAL.Models;
 using Services.DTOs.Input;
@@ -9,7 +7,7 @@ using Services.DTOs.Output;
 
 namespace API
 {
-	public static class AutoMapperConfig
+    public static class AutoMapperConfig
 	{
 		public static void RegisterModel()
 		{
@@ -19,10 +17,15 @@ namespace API
 
 			configuration.CreateMap<UserInputDto, User>();
 
-			configuration.CreateMap<User, UserOutputDto>().ForMember(
-				destination => destination.Roles,
-				map => map.MapFrom(source => source.GetRoles())
-			);
+            configuration.CreateMap<User, UserOutputDto>()
+                .ForMember(
+                    destination => destination.Roles,
+                    map => map.MapFrom(source => source.GetRoles())
+                )
+                .ForMember(
+                    destination => destination.Gender,
+                    map => map.MapFrom(source => source.Gender.ToString())
+                );
 
             #endregion
 

@@ -17,16 +17,16 @@ using System.Net;
 
 namespace Services.Implementations
 {
-	public class UserService : EntityService<User>, IUserService
-	{
-		private readonly IRoleService _roleService;
-		private readonly IUserRoleService _userRoleService;
+    public class UserService : EntityService<User>, IUserService
+    {
+        private readonly IRoleService _roleService;
+        private readonly IUserRoleService _userRoleService;
 
-		public UserService(IUserRoleService userRoleService, IRoleService roleService)
-		{
-			_userRoleService = userRoleService;
-			_roleService = roleService;
-		}
+        public UserService(IUserRoleService userRoleService, IRoleService roleService)
+        {
+            _userRoleService = userRoleService;
+            _roleService = roleService;
+        }
 
         #region Get Users
 
@@ -60,27 +60,28 @@ namespace Services.Implementations
 
         public BaseResponse<string> Register(UserInputDto authDto)
         {
-            CheckIfEmailExisted(authDto.Email);
+            CheckIfAccountExisted(authDto.Email);
             var user = CreateUser(authDto);
             SetRoleForUser(user.Id, DefaultRole.User);
             return new BaseResponse<string>(HttpStatusCode.OK, data: "Registered successfully");
         }
 
-        private void CheckIfEmailExisted(string email)
+        private void CheckIfAccountExisted(string userName)
         {
-            if (FirstOrDefault(u => u.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase)) != null)
+            if (FirstOrDefault(u => u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase)) != null)
             {
-                throw new BadRequestException($"Account with email {email} is already existed");
+                throw new BadRequestException($"Account with user name {userName} is already existed");
             }
         }
 
         private User CreateUser(UserInputDto authDto)
         {
-            var user = Mapper.Map<User>(authDto).EncodePassword(authDto.Email);
+            var user = Mapper.Map<User>(authDto).EncodePassword(authDto.UserName);
+            user.UserName = authDto.Email;
             var createdUser = Create(user, out var isSaved);
             if (!isSaved)
             {
-                throw new InternalServerErrorException($"Could not create user {authDto.Email}");
+                throw new InternalServerErrorException($"Could not create user {authDto.UserName}");
             }
 
             return createdUser;
@@ -95,7 +96,7 @@ namespace Services.Implementations
             var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
                 .Include(x => x.UserPositions).ThenInclude(x => x.Position)
                 .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
-                .First(u => u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase));
+                .First(u => u.IsActivated() && u.UserName.Equals(authDto.UserName, StringComparison.InvariantCultureIgnoreCase));
             CheckUserPassword(authDto.Password, user);
             var token = JwtHelper.CreateToken(Mapper.Map<UserOutputDto>(user));
             return new BaseResponse<Token>(HttpStatusCode.OK, data: token);
