@@ -60,46 +60,61 @@ namespace Services.Implementations
 
         public BaseResponse<string> Register(UserInputDto authDto)
         {
-            CheckIfAccountExisted(authDto.Email);
-            var user = CreateUser(authDto);
+            var user = InitUserNameAndPassword(authDto);
+            CheckIfAccountExisted(user.UserName);
+            CreateUser(user);
             SetRoleForUser(user.Id, DefaultRole.User);
             return new BaseResponse<string>(HttpStatusCode.OK, data: "Registered successfully");
         }
 
+        private static User InitUserNameAndPassword(UserInputDto authDto)
+        {
+            var user = Mapper.Map<User>(authDto);
+            user.UserName = authDto.Email;
+            user.EncodePassword("Sioux@Asia");
+            return user;
+        }
+
         private void CheckIfAccountExisted(string userName)
         {
-            if (FirstOrDefault(u => u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase)) != null)
+            if (Contains(u => u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new BadRequestException($"Account with user name {userName} is already existed");
             }
         }
 
-        private User CreateUser(UserInputDto authDto)
+        private void CreateUser(User user)
         {
-            var user = Mapper.Map<User>(authDto).EncodePassword(authDto.UserName);
-            user.UserName = authDto.Email;
-            var createdUser = Create(user, out var isSaved);
+            Create(user, out var isSaved);
             if (!isSaved)
             {
-                throw new InternalServerErrorException($"Could not create user {authDto.UserName}");
+                throw new InternalServerErrorException($"Could not create user {user.UserName}");
             }
-
-            return createdUser;
         }
 
         #endregion
 
         #region Login
 
-        public BaseResponse<Token> Login(AuthDto authDto)
+        public BaseResponse<Passport> Login(AuthDto authDto)
+        {
+            var user = FindUser(authDto.UserName);
+            CheckUserPassword(authDto.Password, user);
+            var passport = CreatePassport(user);
+            return new SuccessResponse<Passport>(passport);
+        }
+
+        private User FindUser(string userName)
         {
             var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
                 .Include(x => x.UserPositions).ThenInclude(x => x.Position)
                 .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
-                .First(u => u.IsActivated() && u.UserName.Equals(authDto.UserName, StringComparison.InvariantCultureIgnoreCase));
-            CheckUserPassword(authDto.Password, user);
-            var token = JwtHelper.CreateToken(Mapper.Map<UserOutputDto>(user));
-            return new BaseResponse<Token>(HttpStatusCode.OK, data: token);
+                .FirstOrDefault(u => u.IsActivated() && u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
+            if (user == null)
+            {
+                throw new BadRequestException("Wrong User Name");
+            }
+            return user;
         }
 
         private static void CheckUserPassword(string password, User user)
@@ -107,8 +122,15 @@ namespace Services.Implementations
             var hash = PasswordHelper.ComputeHash(password, user.PasswordSalt);
             if (!user.PasswordHash.SequenceEqual(hash))
             {
-                throw new BadRequestException("Mật khẩu không chính xác.");
+                throw new BadRequestException("Wrong Password");
             }
+        }
+
+        private static Passport CreatePassport(User user)
+        {
+            var userOutput = Mapper.Map<UserOutputDto>(user);
+            var token = JwtHelper.CreateToken(userOutput);
+            return new Passport {Token = token.AccessToken, Profile = userOutput};
         }
 
         #endregion

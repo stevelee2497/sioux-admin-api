@@ -35,7 +35,7 @@ namespace API.Controllers
 
 		[HttpPost("login")]
 		[Produces("application/json")]
-		public BaseResponse<Token> Login([FromBody] AuthDto user)
+		public BaseResponse<Passport> Login([FromBody] AuthDto user)
 		{
 			return _userService.Login(user);
 		}

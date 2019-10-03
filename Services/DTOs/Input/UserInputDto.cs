@@ -12,14 +12,17 @@ namespace Services.DTOs.Input
         [Required]
         public string FullName { get; set; }
 
+        [Required]
         public string Location { get; set; }
 
+        [Required]
+        public string Phone { get; set; }
+
+        [Required]
         public string Address { get; set; }
 
         [Required]
         public string Email { get; set; }
-
-        public string PhoneNumber { get; set; }
 
         public string SocialLink { get; set; }
 

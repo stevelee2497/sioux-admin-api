@@ -16,12 +16,6 @@ namespace Services.Extensions
 		public static Guid GetUserId(this ClaimsPrincipal claimsPrincipal)
 			=> claimsPrincipal.Claims.GetUserId();
 
-		public static string GetClient(this IEnumerable<Claim> claims)
-			=> GetClaimValue(claims, ClaimTypes.System);
-
-		public static string GetClient(this ClaimsPrincipal claimsPrincipal)
-			=> claimsPrincipal.Claims.GetClient();
-
 		private static string GetClaimValue(this IEnumerable<Claim> claims, string claimType)
 		{
 			var claim = claims.FirstOrDefault(x => x.Type == claimType);
