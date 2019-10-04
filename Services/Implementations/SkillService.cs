@@ -26,6 +26,10 @@ namespace Services.Implementations
 
         public BaseResponse<SkillOutputDto> Create(SkillInputDto skillInputDto)
         {
+            if (Contains(x => x.Name.Equals(skillInputDto.Name, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new BadRequestException($"Skill {skillInputDto.Name} is already existed");
+            }
             var skill = Create(Mapper.Map<Skill>(skillInputDto), out var isSaved);
             if (!isSaved)
             {
@@ -41,7 +45,8 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<SkillOutputDto>> CreateMany(List<SkillInputDto> skills)
         {
-            var entities = CreateMany(skills.Select(Mapper.Map<Skill>), out var isSaved);
+            var nonExistedSkills = skills.Select(x => x.Name).Except(All().Select(x => x.Name)).Select(x => new Skill {Name = x});
+            var entities = CreateMany(nonExistedSkills, out var isSaved);
 
             if (!isSaved)
             {

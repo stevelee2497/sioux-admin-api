@@ -1,8 +1,8 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace Services.DTOs.Output
 {
-	public class UserOutputDto
+    public class UserOutputDto
 	{
 		public string Id { get; set; }
 
@@ -24,10 +24,14 @@ namespace Services.DTOs.Output
 
         public string Gender { get; set; }
 
-        public DateTimeOffset BirthDate { get; set; }
+        public string BirthDate { get; set; }
 
         public string Description { get; set; }
 
 		public string[] Roles { get; set; }
+
+        public IEnumerable<UserPositionOutputDto> Positions { get; set; }
+        
+        public IEnumerable<UserSkillOutputDto> Skills { get; set; }
 	}
 }

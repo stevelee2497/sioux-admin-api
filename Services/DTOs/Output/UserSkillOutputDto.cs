@@ -4,6 +4,8 @@
     {
         public string Id { get; set; }
 
-        public UserSkillOutputDto Skill { get; set; }
+        public string SkillId { get; set; }
+
+        public string Skill { get; set; }
     }
 }

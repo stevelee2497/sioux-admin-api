@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using DAL.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Abstractions;
 using Services.DTOs.Input;
 using Services.DTOs.Output;
+using System;
+using System.Collections.Generic;
 
 namespace API.Controllers
 {
-	[Route("api/users")]
+    [Route("api/users")]
 	public class UserController : Controller
 	{
 		private readonly IUserService _userService;
