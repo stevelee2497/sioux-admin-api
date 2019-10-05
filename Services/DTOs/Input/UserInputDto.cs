@@ -13,6 +13,9 @@ namespace Services.DTOs.Input
         public string FullName { get; set; }
 
         [Required]
+        public string PositionId { get; set; }
+
+        [Required]
         public string Location { get; set; }
 
         [Required]

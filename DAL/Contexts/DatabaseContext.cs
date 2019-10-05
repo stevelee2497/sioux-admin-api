@@ -26,8 +26,6 @@ namespace DAL.Contexts
 
 		public DbSet<UserRole> UserRoles { get; set; }
 
-        public DbSet<UserPosition> UserPositions { get; set; }
-
         public DbSet<Position> Positions { get; set; }
 
         public DbSet<UserSkill> UserSkills { get; set; }

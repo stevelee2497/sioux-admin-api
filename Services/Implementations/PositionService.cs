@@ -15,13 +15,6 @@ namespace Services.Implementations
 {
     public class PositionService : EntityService<Position>, IPositionService
     {
-        private readonly IUserPositionService _userPositionService;
-
-        public PositionService(IUserPositionService userPositionService)
-        {
-            _userPositionService = userPositionService;
-        }
-
         #region Create
 
         public BaseResponse<PositionOutputDto> Create(PositionInputDto positionInputDto)
@@ -73,22 +66,8 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<PositionOutputDto>> Where(IDictionary<string, string> queryObj)
         {
-            var query = queryObj.ToObject<PositionQuery>();
-            var skills = Where(query).Select(x => Mapper.Map<PositionOutputDto>(x));
+            var skills = All().Select(x => Mapper.Map<PositionOutputDto>(x));
             return new SuccessResponse<IEnumerable<PositionOutputDto>>(skills);
-        }
-
-        private IQueryable<Position> Where(PositionQuery query)
-        {
-            var linq = All();
-
-            if (!string.IsNullOrEmpty(query.UserId))
-            {
-                var userId = Guid.Parse(query.UserId);
-                linq = _userPositionService.Include(x => x.Position).Where(x => x.UserId == userId).Select(x => x.Position);
-            }
-
-            return linq;
         }
 
         #endregion

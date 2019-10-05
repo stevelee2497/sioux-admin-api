@@ -12,6 +12,8 @@ namespace Services.DTOs.Output
 
         public string FullName { get; set; }
 
+        public PositionOutputDto Position { get; set; }
+
         public string Location { get; set; }
 
         public string Address { get; set; }
@@ -30,8 +32,6 @@ namespace Services.DTOs.Output
 
 		public IEnumerable<string> Roles { get; set; }
 
-        public IEnumerable<UserPositionOutputDto> Positions { get; set; }
-        
         public IEnumerable<UserSkillOutputDto> Skills { get; set; }
 	}
 }

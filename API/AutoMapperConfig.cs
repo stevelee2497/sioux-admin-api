@@ -69,17 +69,6 @@ namespace API
 
             #endregion
 
-            #region UserPosition
-
-            configuration.CreateMap<UserPositionInputDto, UserPosition>();
-
-            configuration.CreateMap<UserPosition, UserPositionOutputDto>().ForMember(
-                destination => destination.Position,
-                map => map.MapFrom(source => source.Position.Name)
-            );
-
-            #endregion
-
             Mapper.Initialize(configuration);
 		}
 	}

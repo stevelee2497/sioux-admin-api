@@ -22,6 +22,8 @@ namespace DAL.Models
 
         public string FullName { get; set; }
 
+        public Guid PositionId { get; set; }
+
         public string Location { get; set; }
 
         public string Address { get; set; }
@@ -40,12 +42,12 @@ namespace DAL.Models
 
         public DateTimeOffset? AllowTokensSince { get; set; }
 
+        public virtual Position Position { get; set; }
+
         [InverseProperty("Reporter")]
         public virtual ICollection<Task> CreatedTasks { get; set; }
 
         public virtual ICollection<UserRole> UserRoles { get; set; }
-
-        public virtual ICollection<UserPosition> UserPositions { get; set; }
 
         public virtual ICollection<UserSkill> UserSkills { get; set; }
 
@@ -58,6 +60,5 @@ namespace DAL.Models
         public virtual ICollection<TaskAction> TaskActions { get; set; }
 
         public virtual ICollection<TimeLineEvent> TimeLineEvents { get; set; }
-
     }
 }

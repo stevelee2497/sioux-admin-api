@@ -32,7 +32,7 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<UserOutputDto>> All(IDictionary<string, string> @params)
         {
-            var users = All().Select(x => Mapper.Map<UserOutputDto>(x));
+            var users = Include(x => x.Position).Select(x => Mapper.Map<UserOutputDto>(x));
 
             return new BaseResponse<IEnumerable<UserOutputDto>>(HttpStatusCode.OK, data: users);
         }
@@ -44,7 +44,7 @@ namespace Services.Implementations
         public BaseResponse<User> Get(Guid id)
         {
             var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
-                .Include(x => x.UserPositions).ThenInclude(x => x.Position)
+                .Include(x => x.Position)
                 .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
                 .First(x => x.Id == id);
 
@@ -104,7 +104,7 @@ namespace Services.Implementations
         private User FindUser(string userName)
         {
             var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
-                .Include(x => x.UserPositions).ThenInclude(x => x.Position)
+                .Include(x => x.Position)
                 .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
                 .FirstOrDefault(u => u.IsActivated() && u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
             if (user == null)
