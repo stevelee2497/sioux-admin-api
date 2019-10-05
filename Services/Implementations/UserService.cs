@@ -125,7 +125,7 @@ namespace Services.Implementations
 
         private static Passport CreatePassport(User user)
         {
-            var userOutput = Mapper.Map<UserOutputDto>(user);
+            var userOutput = Mapper.Map<ProfileDto>(user);
             var token = JwtHelper.CreateToken(userOutput);
             return new Passport {Token = token.AccessToken, Profile = userOutput};
         }

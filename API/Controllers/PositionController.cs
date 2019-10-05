@@ -19,7 +19,6 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [Produces("application/json")]
         public BaseResponse<PositionOutputDto> Create([FromBody] PositionInputDto position)
         {

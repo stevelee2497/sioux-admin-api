@@ -19,18 +19,18 @@ namespace Services.Helpers
 
 		private static readonly JwtSecurityTokenHandler Handler = new JwtSecurityTokenHandler();
 
-		public static Token CreateToken(UserOutputDto userOutput)
+		public static Token CreateToken(ProfileDto profile)
         {
             var header = new JwtHeader(new SigningCredentials(SecretKey, SecurityAlgorithms.HmacSha256));
             var payload = new JwtPayload(
                 Jwt.Issuer,
                 Jwt.Audience,
-                CreateClaims(userOutput),
+                CreateClaims(profile),
                 DateTime.UtcNow,
                 DateTime.UtcNow + Jwt.TokenLifetime
             );
             var token = new JwtSecurityToken(header, payload);
-			var refreshToken = Guid.NewGuid().ToString().Replace("-", "") + "." + userOutput.Id;
+			var refreshToken = Guid.NewGuid().ToString().Replace("-", "") + "." + profile.Id;
 			var accessToken = new Token
 			{
 				AccessToken = Handler.WriteToken(token),
@@ -96,10 +96,10 @@ namespace Services.Helpers
 			return true;
 		}
 
-        private static IEnumerable<Claim> CreateClaims(UserOutputDto userOutput)
+        private static IEnumerable<Claim> CreateClaims(ProfileDto profile)
         {
-            yield return new Claim(ClaimTypes.Sid, userOutput.Id);
-            foreach (var role in userOutput.Roles)
+            yield return new Claim(ClaimTypes.Sid, profile.Id);
+            foreach (var role in profile.Roles)
             {
                 yield return new Claim(ClaimTypes.Role, role);
             }

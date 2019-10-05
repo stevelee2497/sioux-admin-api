@@ -19,6 +19,12 @@ namespace API
 
             configuration.CreateMap<User, UserOutputDto>()
                 .ForMember(
+                    destination => destination.Gender,
+                    map => map.MapFrom(source => source.Gender.ToString())
+                );
+
+            configuration.CreateMap<User, ProfileDto>()
+                .ForMember(
                     destination => destination.Roles,
                     map => map.MapFrom(source => source.GetRoles())
                 )
@@ -48,7 +54,6 @@ namespace API
             configuration.CreateMap<Skill, SkillOutputDto>();
 
             #endregion
-
 
             #region UserSkill
 

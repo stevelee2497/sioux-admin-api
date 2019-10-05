@@ -6,6 +6,6 @@ namespace Services.DTOs.Output
     {
         public string Token { get; set; }
 
-        public UserOutputDto Profile { get; set; }
+        public ProfileDto Profile { get; set; }
     }
 }
