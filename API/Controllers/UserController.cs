@@ -20,7 +20,7 @@ namespace API.Controllers
 
 		[HttpGet]
 		[Produces("application/json")]
-		public BaseResponse<List<UserOutputDto>> All([FromHeader] IDictionary<string, string> @params)
+		public BaseResponse<IEnumerable<UserOutputDto>> All([FromHeader] IDictionary<string, string> @params)
 		{
 			return _userService.All(@params);
 		}

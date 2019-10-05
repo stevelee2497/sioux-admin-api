@@ -8,7 +8,7 @@ namespace Services.Abstractions
 {
 	public interface IUserService : IEntityService<User>
 	{
-		BaseResponse<List<UserOutputDto>> All(IDictionary<string, string> @params);
+		BaseResponse<IEnumerable<UserOutputDto>> All(IDictionary<string, string> @params);
 		BaseResponse<User> Get(Guid id);
 		BaseResponse<string> Register(UserInputDto user);
 		BaseResponse<Passport> Login(AuthDto user);

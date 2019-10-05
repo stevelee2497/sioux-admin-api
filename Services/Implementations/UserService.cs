@@ -30,14 +30,11 @@ namespace Services.Implementations
 
         #region Get Users
 
-        public BaseResponse<List<UserOutputDto>> All(IDictionary<string, string> @params)
+        public BaseResponse<IEnumerable<UserOutputDto>> All(IDictionary<string, string> @params)
         {
-            var users = Include(user => user.UserRoles).ThenInclude(user => user.Role)
-                .AsEnumerable()
-                .Select(Mapper.Map<UserOutputDto>)
-                .ToList();
+            var users = All().Select(x => Mapper.Map<UserOutputDto>(x));
 
-            return new BaseResponse<List<UserOutputDto>>(HttpStatusCode.OK, data: users);
+            return new BaseResponse<IEnumerable<UserOutputDto>>(HttpStatusCode.OK, data: users);
         }
 
         #endregion

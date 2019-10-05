@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.Configuration;
 using DAL.Extensions;
 using DAL.Models;
@@ -28,6 +26,18 @@ namespace API
                     destination => destination.Gender,
                     map => map.MapFrom(source => source.Gender.ToString())
                 );
+
+            #endregion
+
+            #region UserRole
+
+            configuration.CreateMap<UserRoleInputDto, UserRole>();
+
+            #endregion
+
+            #region Role
+
+            configuration.CreateMap<Role, RoleOutputDto>();
 
             #endregion
 
