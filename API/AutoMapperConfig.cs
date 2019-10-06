@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using AutoMapper.Configuration;
-using DAL.Extensions;
 using DAL.Models;
 using Services.DTOs.Input;
 using Services.DTOs.Output;
@@ -21,16 +20,14 @@ namespace API
                 .ForMember(
                     destination => destination.Gender,
                     map => map.MapFrom(source => source.Gender.ToString())
-                );
-
-            configuration.CreateMap<User, ProfileDto>()
-                .ForMember(
-                    destination => destination.Roles,
-                    map => map.MapFrom(source => source.GetRoles())
                 )
                 .ForMember(
-                    destination => destination.Gender,
-                    map => map.MapFrom(source => source.Gender.ToString())
+                    destination => destination.Roles,
+                    map => map.MapFrom(source => source.UserRoles)
+                )
+                .ForMember(
+                    destination => destination.Skills,
+                    map => map.MapFrom(source => source.UserSkills)
                 );
 
             #endregion
@@ -38,6 +35,13 @@ namespace API
             #region UserRole
 
             configuration.CreateMap<UserRoleInputDto, UserRole>();
+
+            configuration.CreateMap<UserRole, UserRoleOutputDto>()
+                .ForMember(
+                    destination => destination.RoleName,
+                    map => map.MapFrom(source => source.Role.Name)
+                );
+
 
             #endregion
 

@@ -25,7 +25,14 @@ namespace API.Controllers
 			return _userService.All(@params);
 		}
 
-		[HttpPost]
+        [HttpGet("{id}")]
+        [Produces("application/json")]
+        public BaseResponse<UserOutputDto> Get(Guid id)
+        {
+            return _userService.Get(id);
+        }
+
+        [HttpPost]
 		[Produces("application/json")]
 		public BaseResponse<string> Register([FromBody] UserInputDto user)
 		{

@@ -31,10 +31,7 @@ namespace Services.DTOs.Output
         public string Description { get; set; }
 
         public IEnumerable<UserSkillOutputDto> Skills { get; set; }
-	}
 
-    public class ProfileDto : UserOutputDto
-    {
-        public IEnumerable<string> Roles { get; set; }
-    }
+        public IEnumerable<UserRoleOutputDto> Roles { get; set; }
+	}
 }

@@ -41,14 +41,14 @@ namespace Services.Implementations
 
         #region Get Specific User
 
-        public BaseResponse<User> Get(Guid id)
+        public BaseResponse<UserOutputDto> Get(Guid id)
         {
             var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
                 .Include(x => x.Position)
                 .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
                 .First(x => x.Id == id);
 
-            return new BaseResponse<User>(HttpStatusCode.OK, data: user);
+            return new SuccessResponse<UserOutputDto>(Mapper.Map<UserOutputDto>(user));
         }
 
         #endregion
@@ -125,7 +125,7 @@ namespace Services.Implementations
 
         private static Passport CreatePassport(User user)
         {
-            var userOutput = Mapper.Map<ProfileDto>(user);
+            var userOutput = Mapper.Map<UserOutputDto>(user);
             var token = JwtHelper.CreateToken(userOutput);
             return new Passport {Token = token.AccessToken, Profile = userOutput};
         }
@@ -142,12 +142,15 @@ namespace Services.Implementations
             return new SuccessResponse<UserOutputDto>(Mapper.Map<UserOutputDto>(oldUser));
         }
 
+
         private User UpdateUserInformationIfChanged(User oldUser, User newUser)
         {
             oldUser.AvatarUrl = newUser.AvatarUrl;
             oldUser.FullName = newUser.FullName;
             oldUser.Location = newUser.Location;
             oldUser.Address = newUser.Address;
+            oldUser.Email = newUser.Email;
+            oldUser.PositionId = newUser.PositionId;
             oldUser.Phone = newUser.Phone;
             oldUser.SocialLink = newUser.SocialLink;
             oldUser.BirthDate = newUser.BirthDate;

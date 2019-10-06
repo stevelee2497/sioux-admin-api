@@ -19,7 +19,7 @@ namespace Services.Helpers
 
 		private static readonly JwtSecurityTokenHandler Handler = new JwtSecurityTokenHandler();
 
-		public static Token CreateToken(ProfileDto profile)
+		public static Token CreateToken(UserOutputDto profile)
         {
             var header = new JwtHeader(new SigningCredentials(SecretKey, SecurityAlgorithms.HmacSha256));
             var payload = new JwtPayload(
@@ -96,12 +96,12 @@ namespace Services.Helpers
 			return true;
 		}
 
-        private static IEnumerable<Claim> CreateClaims(ProfileDto profile)
+        private static IEnumerable<Claim> CreateClaims(UserOutputDto profile)
         {
             yield return new Claim(ClaimTypes.Sid, profile.Id);
             foreach (var role in profile.Roles)
             {
-                yield return new Claim(ClaimTypes.Role, role);
+                yield return new Claim(ClaimTypes.Role, role.RoleName);
             }
         }
     }
