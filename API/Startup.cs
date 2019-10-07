@@ -110,7 +110,6 @@ namespace API
 		private void SwaggerUIConfig(SwaggerUIOptions c)
 		{
 			c.SwaggerEndpoint("/swagger/v1/swagger.json", "Chat Server Api v1");
-			c.RoutePrefix = string.Empty;
 		}
 	}
 }
