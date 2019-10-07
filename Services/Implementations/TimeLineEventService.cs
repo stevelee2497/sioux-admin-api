@@ -72,7 +72,7 @@ namespace Services.Implementations
             if (!string.IsNullOrEmpty(query.UserId))
             {
                 var userId = Guid.Parse(query.UserId);
-                linq = Where(x => x.UserId == userId);
+                linq = Where(x => x.IsActivated() && x.UserId == userId);
             }
 
             return linq;

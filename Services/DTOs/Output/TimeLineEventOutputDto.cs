@@ -4,6 +4,6 @@
     {
         public string Id { get; set; }
 
-        public string Action { get; set; }
+        public string Event { get; set; }
     }
 }

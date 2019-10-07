@@ -78,6 +78,14 @@ namespace API
 
             #endregion
 
+            #region TimeLineEvent
+
+            configuration.CreateMap<TimeLineEventInputDto, TimeLineEvent>();
+
+            configuration.CreateMap<TimeLineEvent, TimeLineEventOutputDto>();
+
+            #endregion
+
             Mapper.Initialize(configuration);
 		}
 	}

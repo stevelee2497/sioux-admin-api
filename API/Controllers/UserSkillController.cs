@@ -41,5 +41,12 @@ namespace API.Controllers
         {
             return _userSkillService.Delete(id);
         }
+
+        [HttpGet]
+        [Produces("application/json")]
+        public BaseResponse<IEnumerable<UserSkillOutputDto>> Where([FromHeader] IDictionary<string, string> @params)
+        {
+            return _userSkillService.Where(@params);
+        }
     }
 }

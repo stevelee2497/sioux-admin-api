@@ -80,12 +80,12 @@ namespace Services.Implementations
 
         private IQueryable<Skill> Where(SkillQuery query)
         {
-            var linq = All();
+            var linq = Where(x => x.IsActivated());
 
             if (!string.IsNullOrEmpty(query.UserId))
             {
                 var userId = Guid.Parse(query.UserId);
-                linq = _userSkillService.Include(x => x.Skill).Where(x => x.UserId == userId).Select(x => x.Skill);
+                linq = _userSkillService.Include(x => x.Skill).Where(x => x.UserId == userId && x.IsActivated()).Select(x => x.Skill);
             }
 
             return linq;
