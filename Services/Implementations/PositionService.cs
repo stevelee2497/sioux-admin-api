@@ -66,7 +66,7 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<PositionOutputDto>> Where(IDictionary<string, string> queryObj)
         {
-            var skills = All().Select(x => Mapper.Map<PositionOutputDto>(x));
+            var skills = Where(x => x.IsActivated()).Select(x => Mapper.Map<PositionOutputDto>(x));
             return new SuccessResponse<IEnumerable<PositionOutputDto>>(skills);
         }
 
