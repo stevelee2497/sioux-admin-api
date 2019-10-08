@@ -56,13 +56,13 @@ namespace API
 			}
 
 			ServiceProviderHelper.Init(app.ApplicationServices);
+			app.UseStaticFiles();
 			app.UseCookiePolicy();
 			app.UseAuthentication();
 			app.UseSwagger();
 			app.UseSwaggerUI(SwaggerUIConfig);
 			app.UseCors("AllowAll");
 			app.UseMvc();
-			app.UseStaticFiles();
             DbInitializer.DbInitializer.Seed(app.ApplicationServices);
 		}
 
