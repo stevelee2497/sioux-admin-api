@@ -18,6 +18,8 @@ namespace Repositories.Abstractions
 
 		Task<T> FindAsync(Guid id);
 
+        T First(Expression<Func<T, bool>> predicate);
+
 		T FirstOrDefault(Expression<Func<T, bool>> predicate);
 
 		IQueryable<T> Where(Expression<Func<T, bool>> predicate);
@@ -37,6 +39,7 @@ namespace Repositories.Abstractions
 		bool Delete(T t);
 
 		IEnumerable<T> Delete(IEnumerable<T> objects, out bool isSaved);
+
 		IEnumerable<T> Block(IEnumerable<T> objects, out bool isSaved);
 
 		int Delete(Expression<Func<T, bool>> predicate, out bool isSaved);

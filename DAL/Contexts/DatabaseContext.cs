@@ -1,10 +1,11 @@
+using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using DAL.Models;
+using Task = DAL.Models.Task;
 
 namespace DAL.Contexts
 {
@@ -24,6 +25,37 @@ namespace DAL.Contexts
 		public DbSet<Role> Roles { get; set; }
 
 		public DbSet<UserRole> UserRoles { get; set; }
+
+        public DbSet<Position> Positions { get; set; }
+
+        public DbSet<UserSkill> UserSkills { get; set; }
+
+        public DbSet<Skill> Skills { get; set; }
+
+        public DbSet<BoardUser> BoardUsers { get; set; }
+
+        public DbSet<WorkLog> WorkLogs { get; set; }
+
+        public DbSet<Comment> Comments { get; set; }
+
+        public DbSet<TaskAssignee> TaskAssignees { get; set; }
+
+        public DbSet<TaskAction> TaskActions { get; set; }
+
+        public DbSet<Task> Tasks { get; set; }
+
+        public DbSet<Board> Boards { get; set; }
+
+        public DbSet<Phase> Phases { get; set; }
+
+        public DbSet<Todo> Todos { get; set; }
+
+        public DbSet<Label> Labels { get; set; }
+
+        public DbSet<TaskLabel> TaskLabels { get; set; }
+
+        public DbSet<Attachment> Attachments { get; set; }
+
 
 		#endregion
 

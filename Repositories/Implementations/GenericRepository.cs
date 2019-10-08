@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using DAL.Contexts;
+using DAL.Exceptions;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -37,6 +38,19 @@ namespace Repositories.Implementations
         {
             var result = await GetDataContext().Set<T>().FindAsync(id);
             return result;
+        }
+
+        public T First(Expression<Func<T, bool>> predicate)
+        {
+            try
+            {
+                return GetDataContext().Set<T>().First(predicate);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw new DataNotFoundException($"Table {typeof(T)} have no element satisfied {predicate}");
+            }
         }
 
         public T FirstOrDefault(Expression<Func<T, bool>> predicate)

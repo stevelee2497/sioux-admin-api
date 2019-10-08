@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DAL.Constants
 {
@@ -9,6 +9,7 @@ namespace DAL.Constants
 		public const string InternalServerError = "Internal Server Error";
 		public const string BlockedUser = "UserHasBeenBlocked";
 		public const string InvalidInput = "Invalid Input";
+		public const string CreateError = "Could not create entity {0}";
 	}
 
 	public static class DefaultRole
@@ -23,21 +24,11 @@ namespace DAL.Constants
 		public const string Descending = "desc";
 	}
 
-	public static class BookType
-	{
-		public const string NewBooks = "new";
-		public const string RecommendingBooks = "recommending";
-		public const string TrendingBooks = "trending";
-		public const string FeaturingBooks = "featuring";
-	}
-
 	public static class Jwt
 	{
-		// TODO: Consider moving to SecretManager
-		// https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?tabs=visual-studio
 		public const string Secret = "If you are wondering what is it about, then just ignore it :)))))))))";
 		public const string DefaultScheme = "JwtBearer";
-		public const string Issuer = "busach";
+		public const string Issuer = "sioux admin page";
 		public const string Audience = "Everyone";
 		public static readonly TimeSpan TokenLifetime = TimeSpan.FromDays(30);
 	}

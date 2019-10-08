@@ -39,8 +39,8 @@ namespace API
 		{
 			services.AddSingleton((IConfigurationRoot) Configuration);
 			services.AddSingleton(Configuration);
-			services.AddCors();
-			services.AddMvc(MvcOptions).AddJsonOptions(JsonOptions).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddCors(SetupCors);
+            services.AddMvc(MvcOptions).AddJsonOptions(JsonOptions).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddWebDataLayer();
 			services.AddDbContext<DatabaseContext>(DbContextOptions);
 			services.AddSwaggerGen(SwaggerConfigs);
@@ -48,7 +48,7 @@ namespace API
 			JsonConvert.DefaultSettings = JsonConvertDefaultSettings;
 		}
 
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
 			if (env.IsDevelopment())
 			{
@@ -61,27 +61,28 @@ namespace API
 			app.UseAuthentication();
 			app.UseSwagger();
 			app.UseSwaggerUI(SwaggerUIConfig);
-			app.UseCors(ConfigureCors);
+			app.UseCors("AllowAll");
 			app.UseMvc();
-			DbInitializer.DbInitializer.Seed(app.ApplicationServices);
+            DbInitializer.DbInitializer.Seed(app.ApplicationServices);
 		}
 
-		private JsonSerializerSettings JsonConvertDefaultSettings() => new JsonSerializerSettings
+        private void SetupCors(CorsOptions options)
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        }
+
+        private JsonSerializerSettings JsonConvertDefaultSettings() => new JsonSerializerSettings
 		{
 			Formatting = Formatting.Indented,
 			DefaultValueHandling = DefaultValueHandling.Ignore,
 			ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
 			ContractResolver = new CamelCasePropertyNamesContractResolver()
 		};
-
-		private void ConfigureCors(CorsPolicyBuilder builder)
-		{
-			builder
-				.AllowAnyOrigin()
-				.AllowAnyHeader()
-				.AllowAnyMethod()
-				.AllowCredentials();
-		}
 
 		private void MvcOptions(MvcOptions options)
 		{
@@ -93,6 +94,7 @@ namespace API
 		{
 			options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 			options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
+            options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 		}
 
 		private void DbContextOptions(DbContextOptionsBuilder options)
@@ -107,8 +109,7 @@ namespace API
 
 		private void SwaggerUIConfig(SwaggerUIOptions c)
 		{
-			c.SwaggerEndpoint("/swagger/v1/swagger.json", "Chat Server Api v1");
-			c.RoutePrefix = string.Empty;
+			c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sioux Admin API v1");
 		}
 	}
 }

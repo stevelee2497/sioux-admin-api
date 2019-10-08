@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DAL.Constants;
 using DAL.Exceptions;
 using DAL.Extensions;
@@ -17,162 +17,168 @@ using System.Net;
 
 namespace Services.Implementations
 {
-	public class UserService : EntityService<User>, IUserService
-	{
-		private readonly IRoleService _roleService;
-		private readonly IUserRoleService _userRoleService;
+    public class UserService : EntityService<User>, IUserService
+    {
+        private readonly IRoleService _roleService;
+        private readonly IUserRoleService _userRoleService;
 
-		public UserService(IUserRoleService userRoleService, IRoleService roleService)
-		{
-			_userRoleService = userRoleService;
-			_roleService = roleService;
-		}
+        public UserService(IUserRoleService userRoleService, IRoleService roleService)
+        {
+            _userRoleService = userRoleService;
+            _roleService = roleService;
+        }
 
-		public BaseResponse<List<UserOutputDto>> All(IDictionary<string, string> @params)
-		{
-			var users = Include(user => user.UserRoles).ThenInclude(user => user.Role)
-				.AsEnumerable()
-				.Select(Mapper.Map<UserOutputDto>)
-				.ToList();
+        #region Get Users
 
-			return new BaseResponse<List<UserOutputDto>>(HttpStatusCode.OK, data: users);
-		}
+        public BaseResponse<IEnumerable<UserOutputDto>> All(IDictionary<string, string> @params)
+        {
+            var users = Include(x => x.Position).Select(x => Mapper.Map<UserOutputDto>(x));
 
-		public BaseResponse<User> Get(Guid id)
-		{
-			var user = Find(id);
-			if (user == null)
-			{
-				throw new DataNotFoundException("userOutput");
-			}
+            return new BaseResponse<IEnumerable<UserOutputDto>>(HttpStatusCode.OK, data: users);
+        }
 
-			return new BaseResponse<User>(HttpStatusCode.OK, data: user);
-		}
+        #endregion
 
-		public BaseResponse<string> Register(AuthDto authDto)
-		{
-			if (FirstOrDefault(u => u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase)) != null)
-			{
-				throw new BadRequestException("Tài khoản đã tồn tại.");
-			}
+        #region Get Specific User
 
-			var (salt, hash) = PasswordHelper.GenerateSecurePassword(authDto.Password);
-			var user = new User
-			{
-				Email = authDto.Email,
-				PasswordHash = hash,
-				PasswordSalt = salt,
-				DisplayName = authDto.Email,
-			};
-			var response = Create(user, out var isSaved);
+        public BaseResponse<UserOutputDto> Get(Guid id)
+        {
+            var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
+                .Include(x => x.Position)
+                .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
+                .First(x => x.Id == id);
 
-			var role = _roleService.FirstOrDefault(r => r.Name.Equals(DefaultRole.User));
-			if (role == null)
-			{
-				throw new InternalServerErrorException($"Không có role {DefaultRole.User} tồn tại");
-			}
+            return new SuccessResponse<UserOutputDto>(Mapper.Map<UserOutputDto>(user));
+        }
 
-			_userRoleService.Create(new UserRole {UserId = response.Id, RoleId = role.Id}, out isSaved);
+        #endregion
 
-			if (!isSaved)
-			{
-				throw new InternalServerErrorException("Không thể đăng ký, vui lòng thử lại");
-			}
+        #region Register a user
 
-			return new BaseResponse<string>(HttpStatusCode.OK, data: "Đăng ký thành công");
-		}
+        public BaseResponse<string> Register(UserInputDto authDto)
+        {
+            var user = InitUserNameAndPassword(authDto);
+            CheckIfAccountExisted(user.UserName);
+            CreateUser(user);
+            SetRoleForUser(user.Id, DefaultRole.User);
+            return new BaseResponse<string>(HttpStatusCode.OK, data: "Registered successfully");
+        }
 
-		public BaseResponse<Token> Login(AuthDto authDto)
-		{
-			var user = Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
-				.FirstOrDefault(u =>
-					u.IsActivated() && u.Email.Equals(authDto.Email, StringComparison.InvariantCultureIgnoreCase)
-				);
+        private static User InitUserNameAndPassword(UserInputDto authDto)
+        {
+            var user = Mapper.Map<User>(authDto);
+            user.UserName = authDto.Email;
+            user.EncodePassword("Sioux@Asia");
+            return user;
+        }
 
-			if (user == null)
-			{
-				throw new DataNotFoundException("Tài khoản không tồn tại");
-			}
+        private void CheckIfAccountExisted(string userName)
+        {
+            if (Contains(u => u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new BadRequestException($"Account with user name {userName} is already existed");
+            }
+        }
 
-			var hash = PasswordHelper.ComputeHash(authDto.Password, user.PasswordSalt);
+        private void CreateUser(User user)
+        {
+            Create(user, out var isSaved);
+            if (!isSaved)
+            {
+                throw new InternalServerErrorException($"Could not create user {user.UserName}");
+            }
+        }
 
-			if (!user.PasswordHash.SequenceEqual(hash))
-			{
-				throw new BadRequestException("Mật khẩu không chính xác.");
-			}
+        #endregion
 
-			var token = JwtHelper.CreateToken(Mapper.Map<UserOutputDto>(user));
-			return new BaseResponse<Token>(HttpStatusCode.OK, data: token);
-		}
+        #region Login
 
-		public BaseResponse<UserOutputDto> Update(Guid userId, UserInputDto userInput)
-		{
-			var newUser = Mapper.Map<User>(userInput);
-			var oldUser = Include(u => u.UserRoles).ThenInclude(ur => ur.Role).FirstOrDefault(u => u.Id == userId);
-			oldUser = UpdateUserInformationIfChanged(oldUser, newUser);
-			oldUser = UpdateUserRoleIfChanged(oldUser, oldUser.GetRoles(), userInput.Roles);
-			return new BaseResponse<UserOutputDto>(statusCode: HttpStatusCode.OK,
-				data: Mapper.Map<UserOutputDto>(oldUser));
-		}
+        public BaseResponse<Passport> Login(AuthDto authDto)
+        {
+            var user = FindUser(authDto.UserName);
+            CheckUserPassword(authDto.Password, user);
+            var passport = CreatePassport(user);
+            return new SuccessResponse<Passport>(passport);
+        }
 
-		private User UpdateUserInformationIfChanged(User oldUser, User newUser)
-		{
-			if (oldUser == null)
-			{
-				throw new BadRequestException("Không tồn tại tài khoản này");
-			}
+        private User FindUser(string userName)
+        {
+            var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
+                .Include(x => x.Position)
+                .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
+                .FirstOrDefault(u => u.IsActivated() && u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
+            if (user == null)
+            {
+                throw new BadRequestException("Wrong User Name");
+            }
+            return user;
+        }
 
-			if (oldUser.DisplayName.Equals(newUser.DisplayName) &&
-			    (newUser.DisplayName ?? "").Equals(oldUser.DisplayName))
-			{
-				return oldUser;
-			}
+        private static void CheckUserPassword(string password, User user)
+        {
+            var hash = PasswordHelper.ComputeHash(password, user.PasswordSalt);
+            if (!user.PasswordHash.SequenceEqual(hash))
+            {
+                throw new BadRequestException("Wrong Password");
+            }
+        }
 
-			oldUser.AvatarUrl = newUser.AvatarUrl;
-			oldUser.DisplayName = newUser.DisplayName;
-			var updateUserResult = Update(oldUser);
-			if (!updateUserResult)
-			{
-				throw new InternalServerErrorException(
-					$"Không thể update cho userOutput {JsonConvert.SerializeObject(newUser)}");
-			}
+        private static Passport CreatePassport(User user)
+        {
+            var userOutput = Mapper.Map<UserOutputDto>(user);
+            var token = JwtHelper.CreateToken(userOutput);
+            return new Passport {Token = token.AccessToken, Profile = userOutput};
+        }
 
-			return oldUser;
-		}
+        #endregion
 
-		private User UpdateUserRoleIfChanged(User user, string[] oldRoles, string[] newRoles)
-		{
-			// update userOutput's role to admin
-			if (newRoles.Contains(DefaultRole.Admin) && !oldRoles.Contains(DefaultRole.Admin))
-			{
-				var adminRole = _roleService.FirstOrDefault(r => r.Name.Equals(DefaultRole.Admin));
-				var adminUserRole =
-					_userRoleService.Create(new UserRole {UserId = user.Id, RoleId = adminRole.Id}, out var isSaved);
-				if (!isSaved)
-				{
-					throw new InternalServerErrorException(
-						$"Không thể update role cho userOutput {JsonConvert.SerializeObject(user)}");
-				}
+        #region Update
 
-				adminUserRole.Role = adminRole;
-				user.UserRoles.Add(adminUserRole);
-			}
+        public BaseResponse<UserOutputDto> Update(Guid userId, UserInputDto userInput)
+        {
+            var newUser = Mapper.Map<User>(userInput);
+            var oldUser = First(u => u.Id == userId);
+            oldUser = UpdateUserInformationIfChanged(oldUser, newUser);
+            return new SuccessResponse<UserOutputDto>(Mapper.Map<UserOutputDto>(oldUser));
+        }
 
-			// set userOutput's role from admin to userOutput
-			if (!newRoles.Contains(DefaultRole.Admin) && oldRoles.Contains(DefaultRole.Admin))
-			{
-				var adminUserRole = user.UserRoles.First(ur => ur.IsActivated() && ur.Role.Name.Equals(DefaultRole.Admin));
-				var isDeleted = _userRoleService.Delete(adminUserRole);
-				if (!isDeleted)
-				{
-					throw new InternalServerErrorException(
-						$"Không thể update role cho userOutput {JsonConvert.SerializeObject(user)}");
-				}
 
-				user.UserRoles.Remove(adminUserRole);
-			}
+        private User UpdateUserInformationIfChanged(User oldUser, User newUser)
+        {
+            oldUser.AvatarUrl = newUser.AvatarUrl;
+            oldUser.FullName = newUser.FullName;
+            oldUser.Location = newUser.Location;
+            oldUser.Address = newUser.Address;
+            oldUser.Email = newUser.Email;
+            oldUser.PositionId = newUser.PositionId;
+            oldUser.Phone = newUser.Phone;
+            oldUser.SocialLink = newUser.SocialLink;
+            oldUser.BirthDate = newUser.BirthDate;
+            oldUser.Description = newUser.Description;
 
-			return user;
-		}
-	}
+            var updateUserResult = Update(oldUser);
+            if (!updateUserResult)
+            {
+                throw new InternalServerErrorException($"Không thể update cho userOutput {JsonConvert.SerializeObject(newUser)}");
+            }
+
+            return oldUser;
+        }
+
+        #endregion
+
+        #region Common
+
+        private void SetRoleForUser(Guid userId, string roleName)
+        {
+            var role = _roleService.First(r => r.Name.Equals(roleName));
+            _userRoleService.Create(new UserRole { UserId = userId, RoleId = role.Id }, out var isSaved);
+            if (!isSaved)
+            {
+                throw new InternalServerErrorException($"Could not create role {roleName}");
+            }
+        }
+
+        #endregion
+    }
 }

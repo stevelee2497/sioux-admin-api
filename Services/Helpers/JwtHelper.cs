@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -18,25 +19,18 @@ namespace Services.Helpers
 
 		private static readonly JwtSecurityTokenHandler Handler = new JwtSecurityTokenHandler();
 
-		public static Token CreateToken(UserOutputDto userOutput)
-		{
-			var header = new JwtHeader(new SigningCredentials(SecretKey, SecurityAlgorithms.HmacSha256));
-			var payload = new JwtPayload(
-				Jwt.Issuer,
-				Jwt.Audience,
-				userOutput.Roles.Select(role => new Claim(ClaimTypes.Role, role)),
-				DateTime.UtcNow,
-				DateTime.UtcNow + Jwt.TokenLifetime
-			);
-			var dict = DictionaryHelper.ToDictionary(userOutput);
-			foreach (var (key, value) in dict)
-			{
-				payload.Add(key, value);
-			}
-
-			var token = new JwtSecurityToken(header, payload);
-
-			var refreshToken = Guid.NewGuid().ToString().Replace("-", "") + "." + userOutput.Id;
+		public static Token CreateToken(UserOutputDto profile)
+        {
+            var header = new JwtHeader(new SigningCredentials(SecretKey, SecurityAlgorithms.HmacSha256));
+            var payload = new JwtPayload(
+                Jwt.Issuer,
+                Jwt.Audience,
+                CreateClaims(profile),
+                DateTime.UtcNow,
+                DateTime.UtcNow + Jwt.TokenLifetime
+            );
+            var token = new JwtSecurityToken(header, payload);
+			var refreshToken = Guid.NewGuid().ToString().Replace("-", "") + "." + profile.Id;
 			var accessToken = new Token
 			{
 				AccessToken = Handler.WriteToken(token),
@@ -47,7 +41,7 @@ namespace Services.Helpers
 			return accessToken;
 		}
 
-		public static void ConfigureAuthenticationOptions(AuthenticationOptions options)
+        public static void ConfigureAuthenticationOptions(AuthenticationOptions options)
 		{
 			options.DefaultAuthenticateScheme = Jwt.DefaultScheme;
 			options.DefaultChallengeScheme = Jwt.DefaultScheme;
@@ -101,5 +95,14 @@ namespace Services.Helpers
 
 			return true;
 		}
-	}
+
+        private static IEnumerable<Claim> CreateClaims(UserOutputDto profile)
+        {
+            yield return new Claim(ClaimTypes.Sid, profile.Id);
+            foreach (var role in profile.Roles)
+            {
+                yield return new Claim(ClaimTypes.Role, role.RoleName);
+            }
+        }
+    }
 }
