@@ -16,9 +16,9 @@ namespace API.Controllers
             _fileService = fileService;
         }
 
-        [HttpPost]
+        [HttpPost("{category}")]
         [Produces("application/json")]
-        public Task<BaseResponse<string>> Upload(IFormFile file, [FromForm] string category)
+        public Task<BaseResponse<string>> Upload(string category, IFormFile file)
         {
             return _fileService.Upload(file, category);
         }
