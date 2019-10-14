@@ -10,6 +10,8 @@ namespace DAL.Models
         public string Name { get; set; }
 
         public Guid BoardId { get; set; }
+
+        public string PhaseOrder { get; set; }
      
         public virtual Board Board { get; set; }
 
