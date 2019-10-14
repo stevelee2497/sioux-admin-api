@@ -1,6 +1,8 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using AutoMapper;
 using AutoMapper.Configuration;
 using DAL.Models;
+using Newtonsoft.Json;
 using Services.DTOs.Input;
 using Services.DTOs.Output;
 
@@ -83,6 +85,40 @@ namespace API
             configuration.CreateMap<TimeLineEventInputDto, TimeLineEvent>();
 
             configuration.CreateMap<TimeLineEvent, TimeLineEventOutputDto>();
+
+            #endregion
+
+            #region Board
+
+            configuration.CreateMap<BoardInputDto, Board>()
+                .ForMember(
+                    destination => destination.PhaseOrder,
+                    map => map.MapFrom(source => JsonConvert.SerializeObject(source.PhaseOrder))
+                );
+
+            configuration.CreateMap<Board, BoardOutputDto>()
+                .ForMember(
+                    destination => destination.PhaseOrder,
+                    map => map.MapFrom(source => JsonConvert.DeserializeObject<IEnumerable<string>>(source.PhaseOrder))
+                )
+                .ForMember(
+                    destination => destination.Users,
+                    map => map.MapFrom(source => source.BoardUsers)
+                );
+
+            #endregion
+
+            #region BoardUser
+
+            configuration.CreateMap<BoardUser, BoardUserOutputDto>()
+                .ForMember(
+                    destination => destination.FullName,
+                    map => map.MapFrom(source => source.User.FullName)
+                )
+                .ForMember(
+                    destination => destination.AvatarUrl,
+                    map => map.MapFrom(source => source.User.AvatarUrl)
+                );
 
             #endregion
 

@@ -32,4 +32,9 @@ namespace DAL.Constants
 		public const string Audience = "Everyone";
 		public static readonly TimeSpan TokenLifetime = TimeSpan.FromDays(30);
 	}
+
+    public static class AppConstant
+    {
+        public const string ContentType = "application/json";
+    }
 }
