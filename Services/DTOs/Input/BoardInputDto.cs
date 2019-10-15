@@ -5,6 +5,8 @@ namespace Services.DTOs.Input
 {
     public class BoardInputDto
     {
+        public string Id { get; set; }
+
         [Required]
         public string Name { get; set; }
 

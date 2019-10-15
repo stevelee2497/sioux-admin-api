@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Services.Abstractions;
 using Services.DTOs.Input;
 using Services.DTOs.Output;
+using Services.Extensions;
 
 namespace Services.Implementations
 {
@@ -37,6 +38,7 @@ namespace Services.Implementations
             _boardUserService.Create(boardUser, out isSaved);
             if (!isSaved)
             {
+                Delete(board);
                 throw new InternalServerErrorException($"Could not add board role admin for user {userId}");
             }
 
@@ -49,9 +51,9 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<BoardOutputDto>> Get(IDictionary<string, string> @params)
         {
-            var boards = Where(x => x.IsActivated());
+            var boards = Where(@params).Select(x => Mapper.Map<BoardOutputDto>(x));
 
-            return new SuccessResponse<IEnumerable<BoardOutputDto>>(boards.Select(x => Mapper.Map<BoardOutputDto>(x)));
+            return new SuccessResponse<IEnumerable<BoardOutputDto>>(boards);
         }
 
         public BaseResponse<BoardOutputDto> Get(Guid id)
@@ -60,6 +62,22 @@ namespace Services.Implementations
                 .FirstOrDefault(x => x.IsActivated() && x.Id == id);
 
             return new SuccessResponse<BoardOutputDto>(Mapper.Map<BoardOutputDto>(board));
+        }
+
+        private IQueryable<Board> Where(IDictionary<string, string> @params)
+        {
+            var queries = @params.ToObject<BoardQuery>();
+
+            if (!string.IsNullOrEmpty(queries.UserId))
+            {
+                var userId = Guid.Parse(queries.UserId);
+                return _boardUserService.Include(x => x.Board)
+                    .Where(x => x.IsActivated() && x.UserId == userId)
+                    .Select(x => x.Board)
+                    .Where(x => x.IsActivated());
+            }
+
+            return Where(x => x.IsActivated());
         }
 
         #endregion
