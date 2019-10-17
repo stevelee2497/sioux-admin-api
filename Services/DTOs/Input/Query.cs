@@ -28,4 +28,9 @@
     {
         public string UserId { get; set; }
     }
+
+    public class PhaseQuery : PagingQuery
+    {
+        public string BoardId { get; set; }
+    }
 }

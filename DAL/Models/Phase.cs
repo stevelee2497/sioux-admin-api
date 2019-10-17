@@ -11,7 +11,7 @@ namespace DAL.Models
 
         public Guid BoardId { get; set; }
 
-        public string PhaseOrder { get; set; }
+        public string TaskOrder { get; set; }
      
         public virtual Board Board { get; set; }
 

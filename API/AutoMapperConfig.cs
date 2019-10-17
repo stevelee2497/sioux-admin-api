@@ -122,6 +122,22 @@ namespace API
 
             #endregion
 
+            #region Phase
+
+            configuration.CreateMap<PhaseInputDto, Phase>()
+                .ForMember(
+                    destination => destination.TaskOrder,
+                    map => map.MapFrom(source => JsonConvert.SerializeObject(source.TaskOrder))
+                );
+
+            configuration.CreateMap<Phase, PhaseOutputDto>()
+                .ForMember(
+                    destination => destination.TaskOrder,
+                    map => map.MapFrom(source => JsonConvert.DeserializeObject<IEnumerable<string>>(source.TaskOrder))
+                );
+
+            #endregion
+
             Mapper.Initialize(configuration);
 		}
 	}
