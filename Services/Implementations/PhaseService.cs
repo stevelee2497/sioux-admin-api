@@ -62,7 +62,7 @@ namespace Services.Implementations
         public BaseResponse<PhaseOutputDto> Update(PhaseInputDto phaseInputDto)
         {
             var phase = Mapper.Map<Phase>(phaseInputDto);
-            var isSaved = Update(phase);
+            Update(phase);
             return new SuccessResponse<PhaseOutputDto>(Mapper.Map<PhaseOutputDto>(phase));
         }
 

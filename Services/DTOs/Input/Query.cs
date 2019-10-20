@@ -33,4 +33,9 @@
     {
         public string BoardId { get; set; }
     }
+
+    public class TaskQuery : PagingQuery
+    {
+        public string BoardId { get; set; }
+    }
 }

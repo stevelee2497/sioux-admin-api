@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DAL.Models
@@ -14,7 +13,5 @@ namespace DAL.Models
         public string TaskOrder { get; set; }
      
         public virtual Board Board { get; set; }
-
-        public virtual ICollection<Task> Tasks { get; set; }
     }
 }

@@ -138,6 +138,14 @@ namespace API
 
             #endregion
 
+            #region Task
+
+            configuration.CreateMap<TaskInputDto, Task>();
+
+            configuration.CreateMap<Task, TaskOutputDto>();
+
+            #endregion
+
             Mapper.Initialize(configuration);
 		}
 	}

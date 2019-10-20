@@ -19,7 +19,11 @@ namespace DAL.Models
 
         public Guid ReporterUserId { get; set; }
 
+        public Guid BoardId { get; set; }   
+
         public virtual User Reporter { get; set; }
+
+        public virtual Board Board { get; set; }
 
         public virtual ICollection<WorkLog> WorkLogs { get; set; }
 
