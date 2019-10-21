@@ -33,11 +33,6 @@ namespace Services.Implementations
 
             var assignees = taskInputDto.Assignees.Select(x => new TaskAssignee {UserId = x, TaskId = task.Id});
             _taskAssigneeService.CreateMany(assignees, out isSaved);
-            if (!isSaved)
-            {
-                throw new BadRequestException($"Could not assign task {taskInputDto.Title} to assignees");
-            }
-
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
@@ -81,9 +76,11 @@ namespace Services.Implementations
 
         #region D
 
-        public BaseResponse<bool> Delete(Guid predicate)
+        public BaseResponse<bool> Delete(Guid id)
         {
-            throw new NotImplementedException();
+            var entity = First(x => x.IsActivated() && x.Id == id);
+            var isSaved = Delete(entity);
+            return new SuccessResponse<bool>(isSaved);
         }
 
         #endregion

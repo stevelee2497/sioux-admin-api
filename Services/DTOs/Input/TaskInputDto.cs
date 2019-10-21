@@ -17,7 +17,7 @@ namespace Services.DTOs.Input
 
         public TimeSpan Estimation { get; set; }
 
-        public string ReporterId { get; set; }
+        public string ReporterUserId { get; set; }
 
         public string BoardId { get; set; }
 
