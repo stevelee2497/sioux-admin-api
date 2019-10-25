@@ -4,18 +4,20 @@ using DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DAL.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20191017071628_RenameTaskOrder")]
+    partial class RenameTaskOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.4-servicing-10062")
+                .HasAnnotation("ProductVersion", "2.2.6-servicing-10079")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -221,8 +223,6 @@ namespace DAL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid>("BoardId");
-
                     b.Property<DateTimeOffset>("CreatedTime");
 
                     b.Property<string>("Description");
@@ -232,6 +232,8 @@ namespace DAL.Migrations
                     b.Property<int>("EntityStatus");
 
                     b.Property<TimeSpan>("Estimation");
+
+                    b.Property<Guid?>("PhaseId");
 
                     b.Property<Guid?>("ReporterId");
 
@@ -245,7 +247,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BoardId");
+                    b.HasIndex("PhaseId");
 
                     b.HasIndex("ReporterId");
 
@@ -545,10 +547,9 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.Models.Task", b =>
                 {
-                    b.HasOne("DAL.Models.Board", "Board")
-                        .WithMany()
-                        .HasForeignKey("BoardId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.HasOne("DAL.Models.Phase")
+                        .WithMany("Tasks")
+                        .HasForeignKey("PhaseId");
 
                     b.HasOne("DAL.Models.User", "Reporter")
                         .WithMany("CreatedTasks")

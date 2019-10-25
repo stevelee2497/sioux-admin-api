@@ -1,7 +1,9 @@
 ﻿namespace Services.DTOs.Input
 {
-    public class SkillQuery : PagingQuery
+    public class BoardUserInputDto
     {
         public string UserId { get; set; }
+
+        public string BoardId { get; set; }
     }
 }

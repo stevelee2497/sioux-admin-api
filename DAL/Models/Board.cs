@@ -12,6 +12,8 @@ namespace DAL.Models
 
         public string ImageUrl { get; set; }
 
+        public string PhaseOrder { get; set; }
+
         public virtual ICollection<BoardUser> BoardUsers { get; set; }
 
         public virtual ICollection<Phase> Phases { get; set; }
