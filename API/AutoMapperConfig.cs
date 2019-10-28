@@ -110,6 +110,8 @@ namespace API
 
             #region BoardUser
 
+            configuration.CreateMap<BoardUserInputDto, BoardUser>();
+
             configuration.CreateMap<BoardUser, BoardUserOutputDto>()
                 .ForMember(
                     destination => destination.FullName,
