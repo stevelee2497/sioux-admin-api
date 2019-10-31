@@ -69,7 +69,14 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Update(TaskInputDto taskInputDto)
         {
-            throw new NotImplementedException();
+            var task = Mapper.Map<Task>(taskInputDto);
+            var isSaved = Update(task);
+            if (!isSaved)
+            {
+                throw new BadRequestException("Could not update task");
+            }
+
+            return new SuccessResponse<bool>(true);
         }
 
         #endregion
