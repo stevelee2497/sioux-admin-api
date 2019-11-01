@@ -10,11 +10,13 @@ namespace Services.DTOs.Output
 
         public string Description { get; set; }
 
-        public DateTimeOffset StartDate { get; set; }
+        public DateTimeOffset CreatedTime { get; set; }
 
         public DateTimeOffset DueDate { get; set; }
 
         public TimeSpan Estimation { get; set; }
+
+        public TimeSpan SpentTime { get; set; }
 
         public string ReporterUserId { get; set; }
 

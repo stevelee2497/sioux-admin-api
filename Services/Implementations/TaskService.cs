@@ -14,13 +14,6 @@ namespace Services.Implementations
 {
     public class TaskService : EntityService<Task>, ITaskService
     {
-        private readonly ITaskAssigneeService _taskAssigneeService;
-
-        public TaskService(ITaskAssigneeService taskAssigneeService)
-        {
-            _taskAssigneeService = taskAssigneeService;
-        }
-
         #region C
 
         public BaseResponse<TaskOutputDto> Create(TaskInputDto taskInputDto)
@@ -31,8 +24,6 @@ namespace Services.Implementations
                 throw new BadRequestException($"Could not create task {taskInputDto.Title}");
             }
 
-            var assignees = taskInputDto.Assignees.Select(x => new TaskAssignee {UserId = x, TaskId = task.Id});
-            _taskAssigneeService.CreateMany(assignees, out isSaved);
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
