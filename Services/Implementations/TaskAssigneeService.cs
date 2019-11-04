@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using DAL.Exceptions;
 using DAL.Extensions;
@@ -25,7 +26,8 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<TaskAssigneeOutputDto>> Where(IDictionary<string, string> @params)
         {
-            throw new NotImplementedException();
+            var entities = Where(x => x.IsActivated()).Select(x => Mapper.Map<TaskAssigneeOutputDto>(x));
+            return new SuccessResponse<IEnumerable<TaskAssigneeOutputDto>>(entities);
         }
 
         public BaseResponse<bool> Delete(Guid id)

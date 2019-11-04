@@ -39,19 +39,21 @@ namespace Services.Implementations
 
         public BaseResponse<TaskOutputDto> Get(Guid id)
         {
-            var task = First(x => x.IsActivated() && x.Id == id);
+            var task = Include(x => x.TaskAssignees).First(x => x.IsActivated() && x.Id == id);
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
         public IQueryable<Task> Where(TaskQuery query)
         {
+            var linq = Include(x => x.TaskAssignees);
+
             if (!string.IsNullOrEmpty(query.BoardId))
             {
                 var boardId = Guid.Parse(query.BoardId);
-                return Where(x => x.IsActivated() && x.BoardId == boardId);
+                return linq.Where(x => x.IsActivated() && x.BoardId == boardId);
             }
 
-            return Where(x => x.IsActivated());
+            return linq.Where(x => x.IsActivated());
         }
 
         #endregion

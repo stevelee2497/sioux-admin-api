@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Services.DTOs.Output
 {
@@ -21,5 +22,7 @@ namespace Services.DTOs.Output
         public string ReporterUserId { get; set; }
 
         public string BoardId { get; set; }
+
+        public IEnumerable<TaskAssigneeOutputDto> TaskAssignees { get; set; }
     }
 }
