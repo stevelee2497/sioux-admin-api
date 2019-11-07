@@ -40,7 +40,7 @@ namespace Services.Implementations
 
         public BaseResponse<PhaseOutputDto> Get(Guid id)
         {
-            var phase = First(x => x.IsActivated() && x.Id == id);
+            var phase = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             return new SuccessResponse<PhaseOutputDto>(Mapper.Map<PhaseOutputDto>(phase));
         }
 
@@ -49,10 +49,10 @@ namespace Services.Implementations
             if (!string.IsNullOrEmpty(queries.BoardId))
             {
                 var boardId = Guid.Parse(queries.BoardId);
-                return Where(x => x.IsActivated() && x.BoardId == boardId);
+                return Where(x => x.EntityStatus == EntityStatus.Activated && x.BoardId == boardId);
             }
 
-            return Where(x => x.IsActivated());
+            return Where(x => x.EntityStatus == EntityStatus.Activated);
         }
 
         #endregion
@@ -72,7 +72,7 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            var phase = First(x => x.IsActivated() && x.Id == id);
+            var phase = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var isSaved = Delete(phase);
             return new SuccessResponse<bool>(isSaved);
         }

@@ -50,7 +50,7 @@ namespace Services.Implementations
 
         public BaseResponse<TimeLineEventOutputDto> Get(Guid id)
         {
-            var timeLineEvent = First(x => x.IsActivated() && x.Id == id);
+            var timeLineEvent = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             return new SuccessResponse<TimeLineEventOutputDto>(Mapper.Map<TimeLineEventOutputDto>(timeLineEvent));
         }
 
@@ -72,7 +72,7 @@ namespace Services.Implementations
             if (!string.IsNullOrEmpty(query.UserId))
             {
                 var userId = Guid.Parse(query.UserId);
-                linq = Where(x => x.IsActivated() && x.UserId == userId);
+                linq = Where(x => x.EntityStatus == EntityStatus.Activated && x.UserId == userId);
             }
 
             return linq;
@@ -84,7 +84,7 @@ namespace Services.Implementations
 
         public BaseResponse<TimeLineEventOutputDto> Update(Guid id, TimeLineEventInputDto @event)
         {
-            var timeLineEvent = First(x => x.IsActivated() && x.Id == id);
+            var timeLineEvent = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             timeLineEvent.Event = @event.Event;
             var isSaved = Update(timeLineEvent);
             if (!isSaved)
@@ -101,7 +101,7 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            var timeLineEvent = First(x => x.IsActivated() && x.Id == id);
+            var timeLineEvent = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var deleted = Delete(timeLineEvent);
             return new SuccessResponse<bool>(deleted);
         }

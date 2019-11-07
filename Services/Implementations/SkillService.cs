@@ -26,7 +26,7 @@ namespace Services.Implementations
 
         public BaseResponse<SkillOutputDto> Create(SkillInputDto skillInputDto)
         {
-            if (Contains(x => x.IsActivated() && x.Name.Equals(skillInputDto.Name, StringComparison.InvariantCultureIgnoreCase)))
+            if (Contains(x => x.EntityStatus == EntityStatus.Activated && x.Name.Equals(skillInputDto.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new BadRequestException($"Skill {skillInputDto.Name} is already existed");
             }
@@ -45,7 +45,7 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<SkillOutputDto>> CreateMany(List<SkillInputDto> skills)
         {
-            var nonExistedSkills = skills.Select(x => x.Name).Except(Where(x => x.IsActivated()).Select(x => x.Name)).Select(x => new Skill {Name = x});
+            var nonExistedSkills = skills.Select(x => x.Name).Except(Where(x => x.EntityStatus == EntityStatus.Activated).Select(x => x.Name)).Select(x => new Skill {Name = x});
             var entities = CreateMany(nonExistedSkills, out var isSaved);
 
             if (!isSaved)
@@ -63,7 +63,7 @@ namespace Services.Implementations
 
         public BaseResponse<SkillOutputDto> Get(Guid id)
         {
-            var skill = First(x => x.IsActivated() && x.Id == id);
+            var skill = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             return new SuccessResponse<SkillOutputDto>(Mapper.Map<SkillOutputDto>(skill));
         }
 
@@ -80,12 +80,12 @@ namespace Services.Implementations
 
         private IQueryable<Skill> Where(SkillQuery query)
         {
-            var linq = Where(x => x.IsActivated());
+            var linq = Where(x => x.EntityStatus == EntityStatus.Activated);
 
             if (!string.IsNullOrEmpty(query.UserId))
             {
                 var userId = Guid.Parse(query.UserId);
-                linq = _userSkillService.Include(x => x.Skill).Where(x => x.UserId == userId && x.IsActivated()).Select(x => x.Skill);
+                linq = _userSkillService.Include(x => x.Skill).Where(x => x.UserId == userId && x.EntityStatus == EntityStatus.Activated).Select(x => x.Skill);
             }
 
             return linq;
@@ -97,7 +97,7 @@ namespace Services.Implementations
 
         public BaseResponse<SkillOutputDto> Update(Guid id, SkillInputDto skillInputDto)
         {
-            var skill = First(x => x.IsActivated() && x.Id == id);
+            var skill = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             skill.Name = skillInputDto.Name;
             var isSaved = Update(skill);
             if (!isSaved)
@@ -114,7 +114,7 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            var skill = First(x => x.IsActivated() && x.Id == id);
+            var skill = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var deleted = Delete(skill);
             return new SuccessResponse<bool>(deleted);
         }

@@ -49,7 +49,7 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            Delete(x => x.Id == id && x.IsActivated(), out var isSaved);
+            Delete(x => x.Id == id && x.EntityStatus == EntityStatus.Activated, out var isSaved);
             if (!isSaved)
             {
                 throw new InternalServerErrorException(string.Format(Error.CreateError, id));

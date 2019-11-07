@@ -26,13 +26,13 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<TaskAssigneeOutputDto>> Where(IDictionary<string, string> @params)
         {
-            var entities = Where(x => x.IsActivated()).Select(x => Mapper.Map<TaskAssigneeOutputDto>(x));
+            var entities = Where(x => x.EntityStatus == EntityStatus.Activated).Select(x => Mapper.Map<TaskAssigneeOutputDto>(x));
             return new SuccessResponse<IEnumerable<TaskAssigneeOutputDto>>(entities);
         }
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            var entity = First(x => x.IsActivated() && x.Id == id);
+            var entity = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var isDeleted = DeletePermanent(entity);
             if (!isDeleted)
             {
