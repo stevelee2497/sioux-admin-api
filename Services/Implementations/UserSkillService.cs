@@ -8,7 +8,7 @@ using Services.DTOs.Output;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DAL.Extensions;
+using DAL.Enums;
 using Services.Extensions;
 
 namespace Services.Implementations

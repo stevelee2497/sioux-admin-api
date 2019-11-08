@@ -5,7 +5,6 @@ using AutoMapper;
 using DAL.Constants;
 using DAL.Enums;
 using DAL.Exceptions;
-using DAL.Extensions;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Abstractions;

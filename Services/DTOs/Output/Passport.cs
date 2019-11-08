@@ -1,6 +1,4 @@
-﻿using DAL.Models;
-
-namespace Services.DTOs.Output
+﻿namespace Services.DTOs.Output
 {
     public class Passport
     {

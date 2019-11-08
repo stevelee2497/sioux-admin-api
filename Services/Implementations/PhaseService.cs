@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using DAL.Enums;
 using DAL.Exceptions;
-using DAL.Extensions;
 using DAL.Models;
 using Services.Abstractions;
 using Services.DTOs.Input;

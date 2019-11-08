@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using DAL.Constants;
 using DAL.Exceptions;
-using DAL.Extensions;
 using DAL.Models;
 using Services.Abstractions;
 using Services.DTOs.Input;
@@ -9,6 +8,7 @@ using Services.DTOs.Output;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DAL.Enums;
 
 namespace Services.Implementations
 {
