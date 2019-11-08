@@ -30,7 +30,7 @@ namespace Services.Implementations
             return new SuccessResponse<IEnumerable<TaskAssigneeOutputDto>>(entities);
         }
 
-        public BaseResponse<bool> Delete(Guid id)
+        public BaseResponse<TaskAssigneeOutputDto> Delete(Guid id)
         {
             var entity = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var isDeleted = DeletePermanent(entity);
@@ -39,7 +39,7 @@ namespace Services.Implementations
                 throw new BadRequestException("Could not remove member from task");
             }
 
-            return new SuccessResponse<bool>(true);
+            return new SuccessResponse<TaskAssigneeOutputDto>(Mapper.Map<TaskAssigneeOutputDto>(entity));
         }
     }
 }

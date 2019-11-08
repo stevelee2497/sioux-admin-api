@@ -10,6 +10,6 @@ namespace Services.Abstractions
     {
         BaseResponse<TaskAssigneeOutputDto> Create(TaskAssigneeInputDto taskAssignee);
         BaseResponse<IEnumerable<TaskAssigneeOutputDto>> Where(IDictionary<string, string> predicate);
-        BaseResponse<bool> Delete(Guid id);
+        BaseResponse<TaskAssigneeOutputDto> Delete(Guid id);
     }
 }

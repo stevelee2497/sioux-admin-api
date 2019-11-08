@@ -37,7 +37,7 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         [Authorize]
         [Produces("application/json")]
-        public BaseResponse<bool> Delete(Guid id)
+        public BaseResponse<TaskAssigneeOutputDto> Delete(Guid id)
         {
             return _taskAssigneeService.Delete(id);
         }
