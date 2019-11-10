@@ -7,20 +7,13 @@ using Services.DTOs.Output;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DAL.Extensions;
+using DAL.Enums;
 using Services.Extensions;
 
 namespace Services.Implementations
 {
     public class TaskService : EntityService<Task>, ITaskService
     {
-        private readonly ITaskAssigneeService _taskAssigneeService;
-
-        public TaskService(ITaskAssigneeService taskAssigneeService)
-        {
-            _taskAssigneeService = taskAssigneeService;
-        }
-
         #region C
 
         public BaseResponse<TaskOutputDto> Create(TaskInputDto taskInputDto)
@@ -31,8 +24,6 @@ namespace Services.Implementations
                 throw new BadRequestException($"Could not create task {taskInputDto.Title}");
             }
 
-            var assignees = taskInputDto.Assignees.Select(x => new TaskAssignee {UserId = x, TaskId = task.Id});
-            _taskAssigneeService.CreateMany(assignees, out isSaved);
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
@@ -48,19 +39,21 @@ namespace Services.Implementations
 
         public BaseResponse<TaskOutputDto> Get(Guid id)
         {
-            var task = First(x => x.IsActivated() && x.Id == id);
+            var task = Include(x => x.TaskAssignees).First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
         public IQueryable<Task> Where(TaskQuery query)
         {
+            var linq = Include(x => x.TaskAssignees);
+
             if (!string.IsNullOrEmpty(query.BoardId))
             {
                 var boardId = Guid.Parse(query.BoardId);
-                return Where(x => x.IsActivated() && x.BoardId == boardId);
+                return linq.Where(x => x.EntityStatus == EntityStatus.Activated && x.BoardId == boardId);
             }
 
-            return Where(x => x.IsActivated());
+            return linq.Where(x => x.EntityStatus == EntityStatus.Activated);
         }
 
         #endregion
@@ -69,7 +62,14 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Update(TaskInputDto taskInputDto)
         {
-            throw new NotImplementedException();
+            var task = Mapper.Map<Task>(taskInputDto);
+            var isSaved = Update(task);
+            if (!isSaved)
+            {
+                throw new BadRequestException("Could not update task");
+            }
+
+            return new SuccessResponse<bool>(true);
         }
 
         #endregion
@@ -78,7 +78,7 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            var entity = First(x => x.IsActivated() && x.Id == id);
+            var entity = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var isSaved = Delete(entity);
             return new SuccessResponse<bool>(isSaved);
         }

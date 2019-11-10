@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using DAL.Constants;
 using DAL.Exceptions;
-using DAL.Extensions;
 using DAL.Models;
 using Services.Abstractions;
 using Services.DTOs.Input;
@@ -9,6 +8,7 @@ using Services.DTOs.Output;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DAL.Enums;
 
 namespace Services.Implementations
 {
@@ -18,7 +18,7 @@ namespace Services.Implementations
 
         public BaseResponse<PositionOutputDto> Create(PositionInputDto positionInputDto)
         {
-            if (Contains(x => x.IsActivated() && x.Name.Equals(positionInputDto.Name, StringComparison.InvariantCultureIgnoreCase)))
+            if (Contains(x => x.EntityStatus == EntityStatus.Activated && x.Name.Equals(positionInputDto.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new BadRequestException($"Position {positionInputDto.Name} is already existed");
             }
@@ -38,7 +38,7 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<PositionOutputDto>> CreateMany(List<PositionInputDto> positions)
         {
-            var nonExistedEntities = positions.Select(x => x.Name).Except(Where(x => x.IsActivated()).Select(x => x.Name)).Select(x => new Position { Name = x });
+            var nonExistedEntities = positions.Select(x => x.Name).Except(Where(x => x.EntityStatus == EntityStatus.Activated).Select(x => x.Name)).Select(x => new Position { Name = x });
             var entities = CreateMany(nonExistedEntities, out var isSaved);
             if (!isSaved)
             {
@@ -55,7 +55,7 @@ namespace Services.Implementations
 
         public BaseResponse<PositionOutputDto> Get(Guid id)
         {
-            var position = First(x => x.IsActivated() && x.Id == id);
+            var position = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             return new SuccessResponse<PositionOutputDto>(Mapper.Map<PositionOutputDto>(position));
         }
 
@@ -65,7 +65,7 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<PositionOutputDto>> Where(IDictionary<string, string> queryObj)
         {
-            var skills = Where(x => x.IsActivated()).Select(x => Mapper.Map<PositionOutputDto>(x));
+            var skills = Where(x => x.EntityStatus == EntityStatus.Activated).Select(x => Mapper.Map<PositionOutputDto>(x));
             return new SuccessResponse<IEnumerable<PositionOutputDto>>(skills);
         }
 
@@ -75,7 +75,7 @@ namespace Services.Implementations
 
         public BaseResponse<PositionOutputDto> Update(Guid id, PositionInputDto positionInputDto)
         {
-            var position = First(x => x.IsActivated() && x.Id == id);
+            var position = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             position.Name = positionInputDto.Name;
             var isSaved = Update(position);
             if (!isSaved)
@@ -92,7 +92,7 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            var position = First(x => x.IsActivated() && x.Id == id);
+            var position = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var deleted = Delete(position);
             return new SuccessResponse<bool>(deleted);
         }

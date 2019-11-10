@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Services.DTOs.Input
 {
@@ -11,16 +10,16 @@ namespace Services.DTOs.Input
 
         public string Description { get; set; }
 
-        public DateTimeOffset StartDate { get; set; }
+        public DateTimeOffset CreatedTime { get; set; }
 
         public DateTimeOffset DueDate { get; set; }
 
         public TimeSpan Estimation { get; set; }
 
+        public TimeSpan SpentTime { get; set; }
+
         public string ReporterUserId { get; set; }
 
         public string BoardId { get; set; }
-
-        public IEnumerable<Guid> Assignees { get; set; }
     }
 }

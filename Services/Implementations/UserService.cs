@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using DAL.Enums;
 
 namespace Services.Implementations
 {
@@ -106,7 +107,7 @@ namespace Services.Implementations
             var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
                 .Include(x => x.Position)
                 .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
-                .FirstOrDefault(u => u.IsActivated() && u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
+                .FirstOrDefault(u => u.EntityStatus == EntityStatus.Activated && u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
             if (user == null)
             {
                 throw new BadRequestException("Wrong User Name");
