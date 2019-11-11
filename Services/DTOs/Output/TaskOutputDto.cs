@@ -24,5 +24,7 @@ namespace Services.DTOs.Output
         public string BoardId { get; set; }
 
         public IEnumerable<TaskAssigneeOutputDto> TaskAssignees { get; set; }
+
+        public IEnumerable<TaskLabelOutputDto> TaskLabels { get; set; }
     }
 }

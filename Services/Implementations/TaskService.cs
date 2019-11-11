@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DAL.Enums;
+using Microsoft.EntityFrameworkCore;
 using Services.Extensions;
 
 namespace Services.Implementations
@@ -45,7 +46,7 @@ namespace Services.Implementations
 
         public IQueryable<Task> Where(TaskQuery query)
         {
-            var linq = Include(x => x.TaskAssignees);
+            var linq = Include(x => x.TaskAssignees).Include(x => x.TaskLabels);
 
             if (!string.IsNullOrEmpty(query.BoardId))
             {

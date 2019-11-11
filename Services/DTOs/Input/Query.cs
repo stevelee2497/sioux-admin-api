@@ -38,4 +38,9 @@
     {
         public string BoardId { get; set; }
     }
+
+    public class LabelQuery : PagingQuery
+    {
+        public string BoardId { get; set; }
+    }
 }

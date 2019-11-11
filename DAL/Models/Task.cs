@@ -32,5 +32,7 @@ namespace DAL.Models
         public virtual ICollection<TaskAssignee> TaskAssignees { get; set; }
 
         public virtual ICollection<TaskAction> TaskActions { get; set; }
+
+        public virtual ICollection<TaskLabel> TaskLabels { get; set; }
     }
 }
