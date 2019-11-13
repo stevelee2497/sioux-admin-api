@@ -33,7 +33,7 @@ namespace Services.Implementations
 
         public BaseResponse<LabelOutputDto> Get(Guid id)
         {
-            var label = First(x => x.Id == id);
+            var label = First(x => x.Id == id && x.EntityStatus == EntityStatus.Activated);
             return new SuccessResponse<LabelOutputDto>(Mapper.Map<LabelOutputDto>(label));
         }
 
@@ -48,10 +48,10 @@ namespace Services.Implementations
             if (!string.IsNullOrEmpty(queries.BoardId))
             {
                 var boardId = Guid.Parse(queries.BoardId);
-                return Where(x => x.BoardId == boardId);
+                return Where(x => x.BoardId == boardId && x.EntityStatus == EntityStatus.Activated);
             }
 
-            return All();
+            return Where(x => x.EntityStatus == EntityStatus.Activated);
         }
 
         #endregion
@@ -79,7 +79,7 @@ namespace Services.Implementations
         public BaseResponse<bool> Delete(Guid id)
         {
             var label = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
-            var deleted = Delete(label);
+            var deleted = DeletePermanent(label);
             if (!deleted)
             {
                 throw new InternalServerErrorException("Could not create label");
