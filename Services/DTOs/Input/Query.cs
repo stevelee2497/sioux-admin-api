@@ -9,6 +9,13 @@
         public string Sort { get; set; }
     }
 
+    public class UserQuery : PagingQuery
+    {
+        public string PositionId { get; set; }
+
+        public string SkillIds { get; set; }
+    }
+
     public class PositionQuery : PagingQuery
     {
         public string UserId { get; set; }
