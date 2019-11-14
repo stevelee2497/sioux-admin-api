@@ -44,7 +44,12 @@ namespace Services.Implementations
         private IQueryable<User> Where(UserQuery queries)
         {
             var linq = Include(x => x.Position).Where(x => x.EntityStatus == EntityStatus.Activated);
-            
+
+            if (!string.IsNullOrEmpty(queries.Name))
+            {
+                linq = linq.Where(x => x.FullName.Contains(queries.Name, StringComparison.InvariantCultureIgnoreCase));
+            }
+
             if (!string.IsNullOrEmpty(queries.PositionId))
             {
                 var positionId = Guid.Parse(queries.PositionId);

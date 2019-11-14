@@ -11,6 +11,8 @@
 
     public class UserQuery : PagingQuery
     {
+        public string Name { get; set; }
+
         public string PositionId { get; set; }
 
         public string SkillIds { get; set; }
