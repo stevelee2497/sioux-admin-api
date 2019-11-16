@@ -7,6 +7,8 @@ namespace Services.DTOs.Output
     {
         public string Id { get; set; }
 
+        public long TaskKey { get; set; }
+
         public string Title { get; set; }
 
         public string Description { get; set; }
@@ -26,5 +28,7 @@ namespace Services.DTOs.Output
         public IEnumerable<TaskAssigneeOutputDto> TaskAssignees { get; set; }
 
         public IEnumerable<TaskLabelOutputDto> TaskLabels { get; set; }
+
+        public IEnumerable<WorkLogOutputDto> WorkLogs { get; set; } 
     }
 }

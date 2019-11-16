@@ -160,6 +160,10 @@ namespace API
                 .ForMember(
                     destination => destination.TaskLabels,
                     map => map.MapFrom(source => source.TaskLabels)
+                )
+                .ForMember(
+                    destination => destination.WorkLogs,
+                    map => map.MapFrom(source => source.WorkLogs)
                 );
 
             #endregion
@@ -177,6 +181,14 @@ namespace API
             configuration.CreateMap<LabelInputDto, Label>();
 
             configuration.CreateMap<Label, LabelOutputDto>();
+
+            #endregion
+
+            #region WorkLog
+
+            configuration.CreateMap<WorkLogInputDto, WorkLog>();
+
+            configuration.CreateMap<WorkLog, WorkLogOutputDto>();
 
             #endregion
 
