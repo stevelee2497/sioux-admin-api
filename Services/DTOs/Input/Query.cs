@@ -9,6 +9,15 @@
         public string Sort { get; set; }
     }
 
+    public class UserQuery : PagingQuery
+    {
+        public string Name { get; set; }
+
+        public string PositionId { get; set; }
+
+        public string SkillIds { get; set; }
+    }
+
     public class PositionQuery : PagingQuery
     {
         public string UserId { get; set; }
@@ -35,6 +44,11 @@
     }
 
     public class TaskQuery : PagingQuery
+    {
+        public string BoardId { get; set; }
+    }
+
+    public class LabelQuery : PagingQuery
     {
         public string BoardId { get; set; }
     }

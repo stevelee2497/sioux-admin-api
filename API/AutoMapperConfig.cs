@@ -142,7 +142,6 @@ namespace API
 
             #region TaskAssignee
 
-
             configuration.CreateMap<TaskAssigneeInputDto, TaskAssignee>();
 
             configuration.CreateMap<TaskAssignee, TaskAssigneeOutputDto>();
@@ -153,10 +152,31 @@ namespace API
 
             configuration.CreateMap<TaskInputDto, Task>();
 
-            configuration.CreateMap<Task, TaskOutputDto>().ForMember(
-                destination => destination.TaskAssignees,
-                map => map.MapFrom(source => source.TaskAssignees)
-            );
+            configuration.CreateMap<Task, TaskOutputDto>()
+                .ForMember(
+                    destination => destination.TaskAssignees,
+                    map => map.MapFrom(source => source.TaskAssignees)
+                )
+                .ForMember(
+                    destination => destination.TaskLabels,
+                    map => map.MapFrom(source => source.TaskLabels)
+                );
+
+            #endregion
+
+            #region TaskLabel
+
+            configuration.CreateMap<TaskLabelInputDto, TaskLabel>();
+
+            configuration.CreateMap<TaskLabel, TaskLabelOutputDto>();
+
+            #endregion
+
+            #region Label
+
+            configuration.CreateMap<LabelInputDto, Label>();
+
+            configuration.CreateMap<Label, LabelOutputDto>();
 
             #endregion
 
