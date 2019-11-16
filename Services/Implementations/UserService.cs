@@ -38,7 +38,7 @@ namespace Services.Implementations
         {
             var users = Where(@params.ToObject<UserQuery>()).Select(x => Mapper.Map<UserOutputDto>(x));
 
-            return new BaseResponse<IEnumerable<UserOutputDto>>(HttpStatusCode.OK, data: users);
+            return new SuccessResponseWithPagination<IEnumerable<UserOutputDto>>(data: users, total: users.Count());
         }
 
         private IQueryable<User> Where(UserQuery queries)
