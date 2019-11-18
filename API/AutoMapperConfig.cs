@@ -160,10 +160,6 @@ namespace API
                 .ForMember(
                     destination => destination.TaskLabels,
                     map => map.MapFrom(source => source.TaskLabels)
-                )
-                .ForMember(
-                    destination => destination.WorkLogs,
-                    map => map.MapFrom(source => source.WorkLogs)
                 );
 
             #endregion

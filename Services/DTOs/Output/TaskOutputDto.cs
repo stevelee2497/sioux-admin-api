@@ -28,7 +28,5 @@ namespace Services.DTOs.Output
         public IEnumerable<TaskAssigneeOutputDto> TaskAssignees { get; set; }
 
         public IEnumerable<TaskLabelOutputDto> TaskLabels { get; set; }
-
-        public IEnumerable<WorkLogOutputDto> WorkLogs { get; set; } 
     }
 }
