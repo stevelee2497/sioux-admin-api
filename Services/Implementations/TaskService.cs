@@ -50,7 +50,7 @@ namespace Services.Implementations
 
         public BaseResponse<TaskOutputDto> Get(Guid id)
         {
-            var task = Include(x => x.TaskAssignees).First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
+            var task = Include(x => x.TaskAssignees).Include(x => x.TaskLabels).First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
@@ -69,7 +69,7 @@ namespace Services.Implementations
                 var memberId = Guid.Parse(query.MemberId);
                 var taskAssigned = _taskAssigneeService.Include(x => x.Task).ThenInclude(x => x.WorkLogs).Where(x => x.UserId == memberId).Select(x => x.Task);
                 var taskLogged = _workLogService.Include(x => x.Task).Where(x => x.UserId == memberId).Select(x => x.Task).GroupBy(x => x.Id).Select(x => x.First());
-                return taskAssigned.Union(taskLogged);
+                return taskAssigned.Union(taskLogged).OrderBy(x => x.BoardId).ThenBy(x => x.TaskKey);
             }
 
             return linq.Where(x => x.EntityStatus == EntityStatus.Activated);
