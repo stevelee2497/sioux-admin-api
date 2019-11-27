@@ -7,6 +7,8 @@ namespace Services.DTOs.Output
     {
         public string Id { get; set; }
 
+        public long TaskKey { get; set; }
+
         public string Title { get; set; }
 
         public string Description { get; set; }

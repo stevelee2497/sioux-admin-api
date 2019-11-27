@@ -180,6 +180,14 @@ namespace API
 
             #endregion
 
+            #region WorkLog
+
+            configuration.CreateMap<WorkLogInputDto, WorkLog>();
+
+            configuration.CreateMap<WorkLog, WorkLogOutputDto>();
+
+            #endregion
+
             Mapper.Initialize(configuration);
 		}
 	}

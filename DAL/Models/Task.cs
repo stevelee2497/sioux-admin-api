@@ -7,6 +7,9 @@ namespace DAL.Models
     [Table("Task")]
     public class Task : BaseEntity
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long TaskKey { get; set; }
+
         public string Title { get; set; }
 
         public string Description { get; set; }

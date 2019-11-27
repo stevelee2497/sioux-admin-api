@@ -46,10 +46,17 @@
     public class TaskQuery : PagingQuery
     {
         public string BoardId { get; set; }
+
+        public string MemberId { get; set; }
     }
 
     public class LabelQuery : PagingQuery
     {
         public string BoardId { get; set; }
+    }
+
+    public class WorkLogQuery : PagingQuery
+    {
+        public string UserId { get; set; }
     }
 }

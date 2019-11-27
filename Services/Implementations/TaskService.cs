@@ -15,6 +15,16 @@ namespace Services.Implementations
 {
     public class TaskService : EntityService<Task>, ITaskService
     {
+        private readonly IWorkLogService _workLogService;
+        private readonly ITaskAssigneeService _taskAssigneeService;
+        
+
+        public TaskService(ITaskAssigneeService taskAssigneeService, IWorkLogService workLogService)
+        {
+            _taskAssigneeService = taskAssigneeService;
+            _workLogService = workLogService;
+        }
+
         #region C
 
         public BaseResponse<TaskOutputDto> Create(TaskInputDto taskInputDto)
@@ -40,7 +50,7 @@ namespace Services.Implementations
 
         public BaseResponse<TaskOutputDto> Get(Guid id)
         {
-            var task = Include(x => x.TaskAssignees).First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
+            var task = Include(x => x.TaskAssignees).Include(x => x.TaskLabels).First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
@@ -52,6 +62,14 @@ namespace Services.Implementations
             {
                 var boardId = Guid.Parse(query.BoardId);
                 return linq.Where(x => x.EntityStatus == EntityStatus.Activated && x.BoardId == boardId);
+            }
+
+            if (!string.IsNullOrEmpty(query.MemberId))
+            {
+                var memberId = Guid.Parse(query.MemberId);
+                var taskAssigned = _taskAssigneeService.Include(x => x.Task).ThenInclude(x => x.WorkLogs).Where(x => x.UserId == memberId).Select(x => x.Task);
+                var taskLogged = _workLogService.Include(x => x.Task).Where(x => x.UserId == memberId).Select(x => x.Task).GroupBy(x => x.Id).Select(x => x.First());
+                return taskAssigned.Union(taskLogged).OrderBy(x => x.BoardId).ThenBy(x => x.TaskKey);
             }
 
             return linq.Where(x => x.EntityStatus == EntityStatus.Activated);
