@@ -29,7 +29,9 @@ namespace Services.Implementations
 
         public BaseResponse<TaskOutputDto> Create(TaskInputDto taskInputDto)
         {
-            var task = Create(Mapper.Map<Task>(taskInputDto), out var isSaved);
+            var entity = Mapper.Map<Task>(taskInputDto);
+            entity.TaskKey = Count(x => x.BoardId == entity.BoardId) + 1;
+            var task = Create(entity, out var isSaved);
             if (!isSaved)
             {
                 throw new BadRequestException($"Could not create task {taskInputDto.Title}");
@@ -99,6 +101,11 @@ namespace Services.Implementations
         {
             var entity = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var isSaved = Delete(entity);
+            if (!isSaved)
+            {
+                throw new BadRequestException("Could not delete task");
+            }
+
             return new SuccessResponse<bool>(isSaved);
         }
 

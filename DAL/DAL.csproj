@@ -11,6 +11,12 @@
     <Compile Remove="Migrations\20190618100305_Init.Designer.cs" />
     <Compile Remove="Migrations\20190807091241_InitForSqlServer.cs" />
     <Compile Remove="Migrations\20190807091241_InitForSqlServer.Designer.cs" />
+    <Compile Remove="Migrations\20191201082349_SetTaskKey1.cs" />
+    <Compile Remove="Migrations\20191201082349_SetTaskKey1.Designer.cs" />
+    <Compile Remove="Migrations\20191201083834_UpdateTaskKey.cs" />
+    <Compile Remove="Migrations\20191201083834_UpdateTaskKey.Designer.cs" />
+    <Compile Remove="Migrations\20191201084016_UpdateTaskKey1.cs" />
+    <Compile Remove="Migrations\20191201084016_UpdateTaskKey1.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
