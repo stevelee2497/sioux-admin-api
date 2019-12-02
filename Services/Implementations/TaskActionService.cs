@@ -33,7 +33,7 @@ namespace Services.Implementations
 
         public BaseResponse<IEnumerable<TaskActionOutputDto>> Where(IDictionary<string, string> @params)
         {
-            var actions = Where(@params.ToObject<TaskActionQuery>()).Select(x => Mapper.Map<TaskActionOutputDto>(x));
+            var actions = Where(@params.ToObject<TaskActionQuery>()).OrderByDescending(x => x.CreatedTime).Select(x => Mapper.Map<TaskActionOutputDto>(x));
             return new SuccessResponse<IEnumerable<TaskActionOutputDto>>(actions);
         }
 
