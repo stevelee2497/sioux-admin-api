@@ -9,5 +9,7 @@
         public string UserId { get; set; }
 
         public string TaskId { get; set; }
+
+        public string CreatedTime { get; set; }
     }
 }

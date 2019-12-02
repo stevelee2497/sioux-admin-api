@@ -8,7 +8,7 @@ using Services.DTOs.Output;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/taskActions")]
     [ApiController]
     public class TaskActionController : ControllerBase
     {

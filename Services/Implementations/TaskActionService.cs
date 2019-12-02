@@ -42,7 +42,7 @@ namespace Services.Implementations
             if (!string.IsNullOrEmpty(queries.TaskId))
             {
                 var taskId = Guid.Parse(queries.TaskId);
-                return Where(x => x.EntityStatus == EntityStatus.Activated && x.UserId == taskId);
+                return Where(x => x.EntityStatus == EntityStatus.Activated && x.TaskId == taskId);
             }
 
             return Where(x => x.EntityStatus == EntityStatus.Activated);
