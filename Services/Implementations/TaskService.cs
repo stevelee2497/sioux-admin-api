@@ -106,7 +106,7 @@ namespace Services.Implementations
                 throw new BadRequestException("Could not delete task");
             }
 
-            return new SuccessResponse<bool>(isSaved);
+            return new SuccessResponse<bool>(true);
         }
 
         #endregion

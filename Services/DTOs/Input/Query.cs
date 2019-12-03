@@ -59,4 +59,9 @@
     {
         public string UserId { get; set; }
     }
+
+    public class TaskActionQuery : PagingQuery
+    {
+        public string TaskId { get; set; }
+    }
 }
