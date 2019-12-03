@@ -110,6 +110,8 @@ namespace API
 
             #region BoardUser
 
+            configuration.CreateMap<BoardUserInputDto, BoardUser>();
+
             configuration.CreateMap<BoardUser, BoardUserOutputDto>()
                 .ForMember(
                     destination => destination.FullName,
@@ -138,11 +140,59 @@ namespace API
 
             #endregion
 
+            #region TaskAssignee
+
+            configuration.CreateMap<TaskAssigneeInputDto, TaskAssignee>();
+
+            configuration.CreateMap<TaskAssignee, TaskAssigneeOutputDto>();
+
+            #endregion
+
             #region Task
 
             configuration.CreateMap<TaskInputDto, Task>();
 
-            configuration.CreateMap<Task, TaskOutputDto>();
+            configuration.CreateMap<Task, TaskOutputDto>()
+                .ForMember(
+                    destination => destination.TaskAssignees,
+                    map => map.MapFrom(source => source.TaskAssignees)
+                )
+                .ForMember(
+                    destination => destination.TaskLabels,
+                    map => map.MapFrom(source => source.TaskLabels)
+                );
+
+            #endregion
+
+            #region TaskLabel
+
+            configuration.CreateMap<TaskLabelInputDto, TaskLabel>();
+
+            configuration.CreateMap<TaskLabel, TaskLabelOutputDto>();
+
+            #endregion
+
+            #region Label
+
+            configuration.CreateMap<LabelInputDto, Label>();
+
+            configuration.CreateMap<Label, LabelOutputDto>();
+
+            #endregion
+
+            #region WorkLog
+
+            configuration.CreateMap<WorkLogInputDto, WorkLog>();
+
+            configuration.CreateMap<WorkLog, WorkLogOutputDto>();
+
+            #endregion
+
+            #region TaskAction
+
+            configuration.CreateMap<TaskActionInputDto, TaskAction>();
+
+            configuration.CreateMap<TaskAction, TaskActionOutputDto>();
 
             #endregion
 

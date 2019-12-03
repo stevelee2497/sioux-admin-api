@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Services.DTOs.Input
+﻿namespace Services.DTOs.Input
 {
     public class UserRoleInputDto
     {

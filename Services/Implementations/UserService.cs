@@ -1,5 +1,6 @@
 using AutoMapper;
 using DAL.Constants;
+using DAL.Enums;
 using DAL.Exceptions;
 using DAL.Extensions;
 using DAL.Helpers;
@@ -14,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Services.Extensions;
 
 namespace Services.Implementations
 {
@@ -21,20 +23,48 @@ namespace Services.Implementations
     {
         private readonly IRoleService _roleService;
         private readonly IUserRoleService _userRoleService;
+        private readonly IUserSkillService _userSkillService;
 
-        public UserService(IUserRoleService userRoleService, IRoleService roleService)
+        public UserService(IUserRoleService userRoleService, IRoleService roleService, IUserSkillService userSkillService)
         {
             _userRoleService = userRoleService;
             _roleService = roleService;
+            _userSkillService = userSkillService;
         }
 
         #region Get Users
 
         public BaseResponse<IEnumerable<UserOutputDto>> All(IDictionary<string, string> @params)
         {
-            var users = Include(x => x.Position).Select(x => Mapper.Map<UserOutputDto>(x));
+            var users = Where(@params.ToObject<UserQuery>()).Select(x => Mapper.Map<UserOutputDto>(x));
 
-            return new BaseResponse<IEnumerable<UserOutputDto>>(HttpStatusCode.OK, data: users);
+            return new SuccessResponseWithPagination<IEnumerable<UserOutputDto>>(data: users, total: users.Count());
+        }
+
+        private IQueryable<User> Where(UserQuery queries)
+        {
+            var linq = Include(x => x.Position).Where(x => x.EntityStatus == EntityStatus.Activated);
+
+            if (!string.IsNullOrEmpty(queries.Name))
+            {
+                linq = linq.Where(x => x.FullName.Contains(queries.Name, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(queries.PositionId))
+            {
+                var positionId = Guid.Parse(queries.PositionId);
+                linq = linq.Where(x => x.PositionId == positionId);
+            }
+
+            if (!string.IsNullOrEmpty(queries.SkillIds))
+            {
+                var skillQuery = _userSkillService.Include(x => x.User).Where(x => x.EntityStatus == EntityStatus.Activated);
+                var skillIds = queries.SkillIds.Split(',').Select(Guid.Parse);
+                skillQuery = skillQuery.Where(x => skillIds.Contains(x.SkillId));
+                linq = linq.Intersect(skillQuery.Select(x => x.User));
+            }
+
+            return linq;
         }
 
         #endregion
@@ -106,7 +136,7 @@ namespace Services.Implementations
             var user = Include(x => x.UserRoles).ThenInclude(x => x.Role)
                 .Include(x => x.Position)
                 .Include(x => x.UserSkills).ThenInclude(x => x.Skill)
-                .FirstOrDefault(u => u.IsActivated() && u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
+                .FirstOrDefault(u => u.EntityStatus == EntityStatus.Activated && u.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
             if (user == null)
             {
                 throw new BadRequestException("Wrong User Name");

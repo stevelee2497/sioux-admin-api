@@ -15,7 +15,7 @@ namespace DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.4-servicing-10062")
+                .HasAnnotation("ProductVersion", "2.2.6-servicing-10079")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -55,6 +55,8 @@ namespace DAL.Migrations
                     b.Property<int>("EntityStatus");
 
                     b.Property<string>("ImageUrl");
+
+                    b.Property<string>("Key");
 
                     b.Property<string>("Name");
 
@@ -124,6 +126,10 @@ namespace DAL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<Guid>("BoardId");
+
+                    b.Property<string>("Color");
+
                     b.Property<DateTimeOffset>("CreatedTime");
 
                     b.Property<int>("EntityStatus");
@@ -134,7 +140,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Labels");
+                    b.ToTable("Label");
                 });
 
             modelBuilder.Entity("DAL.Models.Phase", b =>
@@ -237,7 +243,9 @@ namespace DAL.Migrations
 
                     b.Property<Guid>("ReporterUserId");
 
-                    b.Property<DateTimeOffset>("StartDate");
+                    b.Property<TimeSpan>("SpentTime");
+
+                    b.Property<long>("TaskKey");
 
                     b.Property<string>("Title");
 
@@ -589,7 +597,7 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("DAL.Models.Task", "Task")
-                        .WithMany()
+                        .WithMany("TaskLabels")
                         .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

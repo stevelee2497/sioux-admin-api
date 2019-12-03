@@ -1,4 +1,4 @@
-# asp-net-core-api-base
+# sioux admin api
 This is a base solution for web api using .net core
 
 This solution follows N-layers structure with 3 layers:

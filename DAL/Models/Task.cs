@@ -7,15 +7,17 @@ namespace DAL.Models
     [Table("Task")]
     public class Task : BaseEntity
     {
+        public long TaskKey { get; set; }
+
         public string Title { get; set; }
 
         public string Description { get; set; }
 
-        public DateTimeOffset StartDate { get; set; }
-
         public DateTimeOffset DueDate { get; set; }
 
         public TimeSpan Estimation { get; set; }
+
+        public TimeSpan SpentTime { get; set; }
 
         public Guid ReporterUserId { get; set; }
 
@@ -32,5 +34,7 @@ namespace DAL.Models
         public virtual ICollection<TaskAssignee> TaskAssignees { get; set; }
 
         public virtual ICollection<TaskAction> TaskActions { get; set; }
+
+        public virtual ICollection<TaskLabel> TaskLabels { get; set; }
     }
 }

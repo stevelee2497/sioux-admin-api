@@ -5,7 +5,6 @@ using AutoMapper;
 using DAL.Constants;
 using DAL.Enums;
 using DAL.Exceptions;
-using DAL.Extensions;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Abstractions;
@@ -59,7 +58,7 @@ namespace Services.Implementations
         public BaseResponse<BoardOutputDto> Get(Guid id)
         {
             var board = Include(x => x.BoardUsers).ThenInclude(x => x.User)
-                .FirstOrDefault(x => x.IsActivated() && x.Id == id);
+                .FirstOrDefault(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
 
             return new SuccessResponse<BoardOutputDto>(Mapper.Map<BoardOutputDto>(board));
         }
@@ -72,12 +71,12 @@ namespace Services.Implementations
             {
                 var userId = Guid.Parse(queries.UserId);
                 return _boardUserService.Include(x => x.Board)
-                    .Where(x => x.IsActivated() && x.UserId == userId)
+                    .Where(x => x.EntityStatus == EntityStatus.Activated && x.UserId == userId)
                     .Select(x => x.Board)
-                    .Where(x => x.IsActivated());
+                    .Where(x => x.EntityStatus == EntityStatus.Activated);
             }
 
-            return Where(x => x.IsActivated());
+            return Where(x => x.EntityStatus == EntityStatus.Activated);
         }
 
         #endregion
@@ -96,7 +95,7 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            var board = FirstOrDefault(x => x.IsActivated() && x.Id == id);
+            var board = FirstOrDefault(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var isSaved = DeletePermanent(board);
             return new SuccessResponse<bool>(isSaved);
         }

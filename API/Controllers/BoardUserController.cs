@@ -1,4 +1,5 @@
-﻿using DAL.Constants;
+﻿using System;
+using DAL.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Abstractions;
@@ -20,9 +21,17 @@ namespace API.Controllers
         [HttpPost]
         [Authorize]
         [Produces(AppConstant.ContentType)]
-        public BaseResponse<bool> Create(BoardUserInputDto boardUserInputDto)
+        public BaseResponse<BoardUserOutputDto> Create([FromBody] BoardUserInputDto boardUserInputDto)
         {
             return _boardUserService.Create(boardUserInputDto);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        [Produces(AppConstant.ContentType)]
+        public BaseResponse<bool> Delete(Guid id)
+        {
+            return _boardUserService.Delete(id);
         }
     }
 }

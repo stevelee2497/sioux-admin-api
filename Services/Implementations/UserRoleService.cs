@@ -1,7 +1,7 @@
 ﻿using System;
 using AutoMapper;
+using DAL.Enums;
 using DAL.Exceptions;
-using DAL.Extensions;
 using DAL.Models;
 using Services.Abstractions;
 using Services.DTOs.Input;
@@ -14,7 +14,7 @@ namespace Services.Implementations
         public BaseResponse<bool> Create(UserRoleInputDto userRole)
         {
             var entity = Mapper.Map<UserRole>(userRole);
-            if (Contains(x => x.IsActivated() && x.UserId == entity.UserId && x.RoleId == entity.RoleId))
+            if (Contains(x => x.EntityStatus == EntityStatus.Activated && x.UserId == entity.UserId && x.RoleId == entity.RoleId))
             {
                 throw new BadRequestException($"User Id {entity.UserId} already has role {entity.RoleId}");
             }
@@ -30,7 +30,7 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            Delete(x => x.IsActivated() && x.Id == id, out var isSaved);
+            Delete(x => x.EntityStatus == EntityStatus.Activated && x.Id == id, out var isSaved);
             if (!isSaved)
             {
                 throw new BadRequestException($"Could not delete {id}");

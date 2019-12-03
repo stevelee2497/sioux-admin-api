@@ -7,32 +7,36 @@ using Services.DTOs.Output;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DAL.Extensions;
+using DAL.Enums;
+using Microsoft.EntityFrameworkCore;
 using Services.Extensions;
 
 namespace Services.Implementations
 {
     public class TaskService : EntityService<Task>, ITaskService
     {
+        private readonly IWorkLogService _workLogService;
         private readonly ITaskAssigneeService _taskAssigneeService;
+        
 
-        public TaskService(ITaskAssigneeService taskAssigneeService)
+        public TaskService(ITaskAssigneeService taskAssigneeService, IWorkLogService workLogService)
         {
             _taskAssigneeService = taskAssigneeService;
+            _workLogService = workLogService;
         }
 
         #region C
 
         public BaseResponse<TaskOutputDto> Create(TaskInputDto taskInputDto)
         {
-            var task = Create(Mapper.Map<Task>(taskInputDto), out var isSaved);
+            var entity = Mapper.Map<Task>(taskInputDto);
+            entity.TaskKey = Count(x => x.BoardId == entity.BoardId) + 1;
+            var task = Create(entity, out var isSaved);
             if (!isSaved)
             {
                 throw new BadRequestException($"Could not create task {taskInputDto.Title}");
             }
 
-            var assignees = taskInputDto.Assignees.Select(x => new TaskAssignee {UserId = x, TaskId = task.Id});
-            _taskAssigneeService.CreateMany(assignees, out isSaved);
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
@@ -48,19 +52,29 @@ namespace Services.Implementations
 
         public BaseResponse<TaskOutputDto> Get(Guid id)
         {
-            var task = First(x => x.IsActivated() && x.Id == id);
+            var task = Include(x => x.TaskAssignees).Include(x => x.TaskLabels).First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             return new SuccessResponse<TaskOutputDto>(Mapper.Map<TaskOutputDto>(task));
         }
 
         public IQueryable<Task> Where(TaskQuery query)
         {
+            var linq = Include(x => x.TaskAssignees).Include(x => x.TaskLabels);
+
             if (!string.IsNullOrEmpty(query.BoardId))
             {
                 var boardId = Guid.Parse(query.BoardId);
-                return Where(x => x.IsActivated() && x.BoardId == boardId);
+                return linq.Where(x => x.EntityStatus == EntityStatus.Activated && x.BoardId == boardId);
             }
 
-            return Where(x => x.IsActivated());
+            if (!string.IsNullOrEmpty(query.MemberId))
+            {
+                var memberId = Guid.Parse(query.MemberId);
+                var taskAssigned = _taskAssigneeService.Include(x => x.Task).ThenInclude(x => x.WorkLogs).Where(x => x.UserId == memberId).Select(x => x.Task);
+                var taskLogged = _workLogService.Include(x => x.Task).Where(x => x.UserId == memberId).Select(x => x.Task).GroupBy(x => x.Id).Select(x => x.First());
+                return taskAssigned.Union(taskLogged).OrderBy(x => x.BoardId).ThenBy(x => x.TaskKey);
+            }
+
+            return linq.Where(x => x.EntityStatus == EntityStatus.Activated);
         }
 
         #endregion
@@ -69,7 +83,14 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Update(TaskInputDto taskInputDto)
         {
-            throw new NotImplementedException();
+            var task = Mapper.Map<Task>(taskInputDto);
+            var isSaved = Update(task);
+            if (!isSaved)
+            {
+                throw new BadRequestException("Could not update task");
+            }
+
+            return new SuccessResponse<bool>(true);
         }
 
         #endregion
@@ -78,9 +99,14 @@ namespace Services.Implementations
 
         public BaseResponse<bool> Delete(Guid id)
         {
-            var entity = First(x => x.IsActivated() && x.Id == id);
+            var entity = First(x => x.EntityStatus == EntityStatus.Activated && x.Id == id);
             var isSaved = Delete(entity);
-            return new SuccessResponse<bool>(isSaved);
+            if (!isSaved)
+            {
+                throw new BadRequestException("Could not delete task");
+            }
+
+            return new SuccessResponse<bool>(true);
         }
 
         #endregion
