@@ -64,4 +64,9 @@
     {
         public string TaskId { get; set; }
     }
+
+    public class CommentQuery : PagingQuery
+    {
+        public string TaskId { get; set; }  
+    }
 }
