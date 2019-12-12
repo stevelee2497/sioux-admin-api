@@ -48,9 +48,9 @@ namespace Services.Implementations
 
         #region R
 
-        public BaseResponse<IEnumerable<BoardOutputDto>> Get(IDictionary<string, string> @params)
+        public BaseResponse<IEnumerable<BoardOutputDto>> Get(string role, IDictionary<string, string> @params)
         {
-            var boards = Where(@params).Select(x => Mapper.Map<BoardOutputDto>(x));
+            var boards = Where(role, @params).Select(x => Mapper.Map<BoardOutputDto>(x));
 
             return new SuccessResponse<IEnumerable<BoardOutputDto>>(boards);
         }
@@ -63,10 +63,17 @@ namespace Services.Implementations
             return new SuccessResponse<BoardOutputDto>(Mapper.Map<BoardOutputDto>(board));
         }
 
-        private IQueryable<Board> Where(IDictionary<string, string> @params)
+        private IQueryable<Board> Where(string role, IDictionary<string, string> @params)
         {
             var queries = @params.ToObject<BoardQuery>();
 
+            // get all the boards if user is admin
+            if (role == DefaultRole.Admin)
+            {
+                return Where(x => x.EntityStatus == EntityStatus.Activated);
+            }
+
+            // get the involved boards of the user
             if (!string.IsNullOrEmpty(queries.UserId))
             {
                 var userId = Guid.Parse(queries.UserId);
