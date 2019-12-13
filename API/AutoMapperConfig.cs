@@ -196,6 +196,14 @@ namespace API
 
             #endregion
 
+            #region Comment
+
+            configuration.CreateMap<CommentInputDto, Comment>();
+
+            configuration.CreateMap<Comment, CommentOutputDto>();
+
+            #endregion
+
             Mapper.Initialize(configuration);
 		}
 	}

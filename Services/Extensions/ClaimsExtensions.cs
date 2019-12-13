@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Authentication;
 using System.Security.Claims;
+using DAL.Constants;
 
 namespace Services.Extensions
 {
@@ -15,6 +16,17 @@ namespace Services.Extensions
 
 		public static Guid GetUserId(this ClaimsPrincipal claimsPrincipal)
 			=> claimsPrincipal.Claims.GetUserId();
+
+        public static string GetRole(this ClaimsPrincipal claimsPrincipal)
+        {
+            var roles = claimsPrincipal.Claims.Where(x => x.Type == ClaimTypes.Role).ToList();
+            if (!roles.Any())
+            {
+                throw new AuthenticationException("Token does not contain claim role");
+            }
+
+			return roles.Any(x => x.Value == DefaultRole.Admin) ? DefaultRole.Admin : DefaultRole.User;
+        }
 
 		private static string GetClaimValue(this IEnumerable<Claim> claims, string claimType)
 		{

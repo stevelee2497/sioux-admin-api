@@ -34,7 +34,8 @@ namespace API.Controllers
         [Produces(AppConstant.ContentType)]
         public BaseResponse<IEnumerable<BoardOutputDto>> Get([FromHeader] IDictionary<string, string> @params)
         {
-            return _boardService.Get(@params);
+            var role = User.GetRole();
+            return _boardService.Get(role, @params);
         }
 
         [HttpGet("{id}")]
