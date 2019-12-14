@@ -1,0 +1,10 @@
+services:
+  sioux-admin-api:
+    restart: always
+    image: sioux-admin-api
+    container_name: sioux-admin-api
+    build: .
+    volumes: 
+      - './build-api:/app'
+    ports: 
+      - '2704:2704'
