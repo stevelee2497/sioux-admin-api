@@ -39,7 +39,7 @@ namespace API
 		{
 			services.AddSingleton((IConfigurationRoot) Configuration);
 			services.AddSingleton(Configuration);
-            services.AddCors();
+            services.AddCors(SetupCors);
             services.AddMvc(MvcOptions).AddJsonOptions(JsonOptions).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddWebDataLayer();
 			services.AddDbContext<DatabaseContext>(DbContextOptions);
@@ -57,14 +57,24 @@ namespace API
 
 			ServiceProviderHelper.Init(app.ApplicationServices);
 			app.UseStaticFiles();
-            app.UseCors(options => options.WithOrigins("http://localhost:8000").AllowAnyMethod().AllowAnyHeader());
 			app.UseCookiePolicy();
 			app.UseAuthentication();
 			app.UseSwagger();
 			app.UseSwaggerUI(SwaggerUIConfig);
+			app.UseCors("AllowAll");
 			app.UseMvc();
             DbInitializer.DbInitializer.Seed(app.ApplicationServices);
 		}
+
+        private void SetupCors(CorsOptions options)
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        }
 
         private JsonSerializerSettings JsonConvertDefaultSettings() => new JsonSerializerSettings
 		{
