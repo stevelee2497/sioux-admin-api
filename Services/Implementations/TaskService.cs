@@ -30,7 +30,13 @@ namespace Services.Implementations
         public BaseResponse<TaskOutputDto> Create(TaskInputDto taskInputDto)
         {
             var entity = Mapper.Map<Task>(taskInputDto);
-            entity.TaskKey = Count(x => x.BoardId == entity.BoardId) + 1;
+            var taskKey = Count(x => x.BoardId == entity.BoardId) + 1;
+            if (taskKey == 0)
+            {
+                throw new BadRequestException($"Could not create task {taskInputDto.Title}");
+            }
+
+            entity.TaskKey = taskKey;
             var task = Create(entity, out var isSaved);
             if (!isSaved)
             {
