@@ -9,4 +9,4 @@ services:
     volumes: 
       - './build-api:/app'
     ports: 
-      - '2704:2704'
+      - '2704:80'
