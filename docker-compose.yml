@@ -10,3 +10,10 @@ services:
       - './build-api:/app'
     ports: 
       - '5001:80'
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external:
+      name: traefik_proxy
