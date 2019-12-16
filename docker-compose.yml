@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  sioux-admin-api:
+    restart: always
+    image: sioux-admin-api
+    container_name: sioux-admin-api
+    build: .
+    volumes: 
+      - './build-api:/app'
+    ports: 
+      - '5001:80'
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external:
+      name: traefik_proxy
