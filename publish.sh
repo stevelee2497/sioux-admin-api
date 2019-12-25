@@ -22,7 +22,7 @@ case "$response" in
         scp -C -i ~/.ssh/private_key -P 22 -r ${BUILD_FOLDER} ${REMOTE_ID}:${DEPLOYMENT_REMOTE_PATH}
 
         echo "RESTART DOCKER ..."
-        export REMOTE_DOCKER_COMMAND="cd ${DEPLOYMENT_REMOTE_PATH};docker-compose up -d --force-recreate ${CONTAINER};"
+        export REMOTE_DOCKER_COMMAND="cd ~/sioux-admin-website;docker-compose up -d --build ${CONTAINER};"
         ssh -p 22 -i ~/.ssh/private_key ${REMOTE_ID} ${REMOTE_DOCKER_COMMAND}
         ;;
     *)
